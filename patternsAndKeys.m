@@ -1,4 +1,4 @@
-function [pattern,FieldKeys] = patternsAndKeys  
+function [pattern,FieldKeys] = patternsAndKeys
     %% dir and file formats
     pattern.fname = 'CUT_yyyymmdd_SSS-NNN_WWW-EEE.mat';
     pattern.prefix.cuts = 'CUT';
@@ -24,14 +24,13 @@ function [pattern,FieldKeys] = patternsAndKeys
         'amp.to_ellipse';
         'amp.to_mean';
         'iq';
-        };  
+        };
+    %%
     FieldKeys.senses =  { ...
         'AntiCycs';
         'Cycs';
         };
     %% Rossby
-    FieldKeys.Rossby  =  { ...
-        'RossbyPhaseSpeed'   ;
-        'RossbyRadius' ;
-        };
+    FieldKeys.Rossby.phaseSpeed = 'RossbyPhaseSpeed';
+    FieldKeys.Rossby.radius     = 'RossbyRadius';
 end

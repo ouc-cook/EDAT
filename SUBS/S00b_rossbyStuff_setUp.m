@@ -1,34 +1,15 @@
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Created: 15-Jul-2014 13:52:44
-% Computer:  GLNX86
-% Matlab:  7.9
-% Author:  NK
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [TS]=S00b_rossbyStuff_setUp(DD)   
     %% temp salt keys
-    TS = getTempSaltFiles(tempSaltKeys);
+    TS = getTempSaltFiles(tempSaltKeys);    
+    TS.keys = mergeStruct2(DD.FieldKeys.Rossby,TS.keys);
     %% get window according to user input
     TS.map = DD.map.in;
     TS.map.keys = TS.keys;
     [TS.window,~] = GetWindow3(TS.salt{1},TS.map);
     %% distro X lims to chunks
-   TS.lims.dataIn = limsdata(TS.chunks,TS.window);
+   TS.lims.chunks = limsdata(TS.numChunks, TS.window);
     %% distro chunks to threads
-    TS.lims.loop = thread_distro(DD.threads.num,TS.chunks);
-end
-
-function TS = tempSaltKeys
-    TS.dir = '/scratch/uni/ifmto/u300065/TempSaltUV/';
-    TS.keys.lat = 'U_LAT_2D';
-    TS.keys.lon = 'U_LON_2D';
-    TS.keys.salt = 'SALT';
-    TS.keys.temp = 'TEMP';
-    TS.keys.depth = 'depth_t';
-    %%
-    TS.files = dir2([TS.dir,'*.nc']);
-    TS.chunks = 28; % number of chunks for brunt väis calculations
-    TS.salinityFactor = 1000;
+    TS.lims.threads = thread_distro(DD.threads.num,TS.numChunks);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function lims=limsdata(splits,window)
