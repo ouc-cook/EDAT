@@ -5,7 +5,7 @@ function DD=INPUT
     %   DD.template='aviso';
     DD.template='pop';
     %% threads / debug
-    DD.threads.num = 1;
+    DD.threads.num = 6;
     %% time
     DD.time.from.str  = '19940105'; %first pop/avi
     DD.time.till.str  = '19940106';

@@ -15,7 +15,9 @@ function DD = initialise(dataToCheck)
     %% scan for files and append
     DD.path = catstruct(DD.path,findfiles(DD));
     %% scan data 2 be checked
-    DD = checkData(DD,dataToCheck);
+    if ~isempty(dataToCheck)
+        DD = checkData(DD,dataToCheck);
+    end
     %% load workers
     DD.threads.num = init_threads(DD.threads.num);
     %% show some info
@@ -46,7 +48,7 @@ function DD = checkData(DD,toCheck)
     temp = num2cell(DD.time.timesteps.n(DD.time.passed))';
     [checks.passed.daynums] = deal(temp{:});
     %% find corresponding filenames
-    checks.passed = getFnames(DD,checks,toCheck);
+    [checks.passed] = getFnames(DD,checks,toCheck);
     %% disp found files
     filedisps(checks);
     %% append
@@ -111,7 +113,7 @@ function pass = checkForFiles(TT)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function del_t=buildNewDt(TT)
+function del_t = buildNewDt(TT)
     del_t = nan(TT.span,1);
     tempdelt = TT.delta_t; % regular timestep
     for tt = 2:numel(TT.passed);
@@ -138,13 +140,10 @@ function passed = getFnames(DD,checks,toCheck)
         ts = timestr{cc};
         if strcmp(toCheck,'raw') % raw filenames relevant
             passed(cc).filenames = [path.name, strrep(DD.map.in.fname, 'yyyymmdd',ts)];
-            passed(cc).protofilenames = [];
         else % build new filenames
             geo = DD.map.in;
             file.out = strrep(strrep(pattern, 'yyyymmdd',ts),'CUT',DD.pattern.prefix.(toCheck));
-            passed(cc).filenames = [ NSWE2nums(path.name,file.out,geo,ts)  ];
-            ii=strfind(passed(cc).filenames,'_');
-            passed(cc).protofilenames = passed(cc).filenames(ii:end);
+            passed(cc).filenames = NSWE2nums(path.name,file.out,geo,ts);
         end
     end
 end
@@ -172,26 +171,19 @@ function PATH = findfiles(DD)
     %%
     [~,~,ext.raw] = fileparts(DD.map.in.fname);
     patt = strsplit(DD.map.in.fname,'yyyymmdd');
-    PATH.raw.files = dir([PATH.raw.name,patt{1},'*']);
+    PATH.raw.files = dir2([PATH.raw.name,patt{1},'*']);
     PATH.protoMaps.file = [PATH.root, 'protoMaps.mat'];
     PATH.meanU.file = [PATH.root, 'meanU.mat'];
-    PATH.cuts.files = dir([PATH.cuts.name,'*.mat']);
-    PATH.conts.files = dir([PATH.conts.name,'*.mat']);
-    PATH.eddies.files = dir([PATH.eddies.name,'*.mat']);
-    PATH.tracks.files = dir([PATH.tracks.name,'*.mat']);
-    PATH.Rossby.files = [dir([PATH.Rossby.name,'*.nc']); dir([PATH.Rossby.name,'*.mat'])];
+    PATH.cuts.files = dir2([PATH.cuts.name,'*.mat']);
+    PATH.conts.files = dir2([PATH.conts.name,'*.mat']);
+    PATH.eddies.files = dir2([PATH.eddies.name,'*.mat']);
+    PATH.tracks.files = dir2([PATH.tracks.name,'*.mat']);
+    PATH.Rossby.files = [dir2([PATH.Rossby.name,'*.nc']); dir2([PATH.Rossby.name,'*.mat'])];
     %%
-    PATH.TempSalt.files = tempsalt(DD);
+    
     PATH.windowFile = [PATH.root 'window.mat'];
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function files = tempsalt(DD)
-    try
-        files = dir([DD.path.TempSalt.name,'*.nc']);
-    catch  %#ok<CTCH>
-        disp('found no Salt/Temp data!')
-    end
-end
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function mkDirs(path)
     %%
