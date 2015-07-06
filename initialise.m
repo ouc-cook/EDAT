@@ -166,6 +166,7 @@ function PATH = findfiles(DD)
     PATH.tracks.name = [PATH.root,'TRACKS/'];
     PATH.Rossby.name = [PATH.root,'ROSSBY/'];
     PATH.Rossby.Nfile = [PATH.Rossby.name,'N.cdf']; % TODO ?
+    
     %% create nonexistant dirs
     mkDirs(PATH)
     %%
@@ -173,12 +174,13 @@ function PATH = findfiles(DD)
     patt = strsplit(DD.map.in.fname,'yyyymmdd');
     PATH.raw.files = dir2([PATH.raw.name,patt{1},'*']);
     PATH.protoMaps.file = [PATH.root, 'protoMaps.mat'];
-    PATH.meanU.file = [PATH.root, 'meanU.mat'];
+%     PATH.meanU.file = [PATH.root, 'meanU.mat'];
+    PATH.meanSsh.file = [PATH.root, 'meanSSH.mat'];
     PATH.cuts.files = dir2([PATH.cuts.name,'*.mat']);
     PATH.conts.files = dir2([PATH.conts.name,'*.mat']);
     PATH.eddies.files = dir2([PATH.eddies.name,'*.mat']);
     PATH.tracks.files = dir2([PATH.tracks.name,'*.mat']);
-    PATH.Rossby.files = [dir2([PATH.Rossby.name,'*.nc']); dir2([PATH.Rossby.name,'*.mat'])];
+    PATH.Rossby.files = dir2([PATH.Rossby.name,'*.mat']);
     %%
     
     PATH.windowFile = [PATH.root 'window.mat'];

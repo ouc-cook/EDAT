@@ -17,8 +17,7 @@ function S00b_rossbyStuff
     %% spmd
     main(TS,DD)
     %% make netcdf
-    WriteMatFile(DD,TS);
-    
+    WriteMatFile(DD,TS);    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(TS,DD)
@@ -83,7 +82,7 @@ function WriteMatFile(DD,TS)
     for cc = 1:2
         %% fieldname / fileout name
         FN=TS.keys.(FF{cc});
-        MATfileName=[TS.dir FN '.mat'];
+        MATfileName=[DD.path.Rossby.name FN '.mat'];      
         saveField(TS,FN,MATfileName, oriData.window)
     end   
 end

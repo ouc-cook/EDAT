@@ -2,13 +2,13 @@
 % theoretically NEEDS FULL RE RUN IF DATES ARE CHANGED !!!!(meanSSH)
 function S01_calc_fields
     %% init
-    DD = initialise('cuts',mfilename);
+    DD = initialise('cuts');
     %% read input file
     window = getfieldload(DD.path.windowFile,'window');
-    coriolis = coriolisStuff(window.lat);    
+    coriolis = coriolisStuff(window.lat);
     RS = getRossbyStuff(DD);
     %% spmd
-    main(DD,RS,coriolis)    
+    main(DD,RS,coriolis)
     %% append coriolis to window file
     window.coriolis = coriolis;
     save(DD.map.windowFile,'window');
@@ -19,7 +19,7 @@ function main(DD,RS,coriolis)
     spmd(DD.threads.num)
         [JJ] = SetThreadVar(DD);
         spmd_meanSsh(DD,JJ);
-    end  
+    end
     MeanSsh = saveMean(DD);
     % MeanSsh = getfield(load([DD.path.root, 'meanSSH.mat']),'MeanSsh');
     %%
@@ -43,12 +43,8 @@ function MeanSsh = saveMean(DD)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function RS = getRossbyStuff(DD)
-    if DD.switchs.RossbyStuff
-        RS.Lr = getfield(load([DD.path.Rossby.name DD.FieldKeys.Rossby{1} '.mat']),'data');
-        RS.c = getfield(load([DD.path.Rossby.name DD.FieldKeys.Rossby{2}  '.mat']),'data');
-    else
-        RS = [];
-    end
+    RS.Lr = getfield(load([DD.path.Rossby.name DD.FieldKeys.Rossby.radius    '.mat']),'data');
+    RS.c = getfield(load([DD.path.Rossby.name DD.FieldKeys.Rossby.phaseSpeed '.mat']),'data');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function spmd_meanSsh(DD,JJ)
@@ -112,7 +108,7 @@ function spmd_fields(DD,RS,JJ,MeanSsh)
         coriolis = coriolisStuff(DD.map.window.lat);
         %% calc
         fields = geostrophy(DD.map.window,cut.fields,coriolis,RS); %#ok<NASGU>
-        %% write      
+        %% write
         save(JJ(jj).files,'fields','-append');
     end
 end
