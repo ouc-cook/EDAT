@@ -7,7 +7,7 @@ function S01_calc_fields
     coriolis = coriolisStuff(window.lat);
     %% spmd
     main(DD,coriolis,window)
-    %% save coriolis fields    
+    %% save coriolis fields
     save(DD.path.coriolisFile,'coriolis');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,7 +32,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function fields = geostrophy(window,fields,corio)
     %% ssh gradient
-    [sshgrad_x,sshgrad_y] = dsshdxi(fields.ssh,window.dx,window.dy);
+    [sshgrad_x,sshgrad_y] = dsshdxi(fields.sshAnom,window.dx,window.dy);
     %% velocities
     fields.U = -corio.GOverF .* sshgrad_y;
     fields.V =  corio.GOverF .* sshgrad_x;

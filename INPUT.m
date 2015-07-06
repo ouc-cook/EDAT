@@ -6,6 +6,8 @@ function DD=INPUT
     DD.template='pop';
     %% threads / debug
     DD.threads.num = 6;
+    %% overwrite data
+    DD.overwrite = true;
     %% time
     DD.time.from.str  = '19940105'; %first pop/avi
     DD.time.till.str  = '19940106';
