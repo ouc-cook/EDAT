@@ -1,26 +1,27 @@
-% build time-mean of SSH
+% subtract time-mean of SSH from SSH to build anomaly
 function S00d_buildSshAnomaly
     %% init
     DD = initialise('cuts');
-    %% load geo data
-    window = getfieldload(DD.path.windowFile,'window');
-    %% spmd
-    main(DD,window);
+    %% main
+    main(DD);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function main(DD,window)
+function main(DD)
     %% init
-    sshSum = nan(window.dimPlus.y,window.dimPlus.x);
+    sshMean = getfieldload(DD.path.meanSsh.file,'sshMean');
     files = DD.checks.passed;
     %% sum all SSH
-    for ff = 1:numel(files) % TODO make parallel
-        %% load
-        ssh = getfield(getfieldload(files(ff).filenames,'fields'),'ssh');
-        %% mean ssh
-        sshSum = nansum([sshSum, ssh],2);
+    parfor ff = 1:numel(files)
+        loopOverFiles(ff,files,sshMean)
     end
-    %% build mean
-    sshMean = sshSum./ numel(files); %#ok<NASGU>
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function loopOverFiles(ff,files,sshMean)
+    currentFile = files(ff).filenames;
+    %% load
+    cut = load(currentFile);
+    %% subtract
+    cut.fields.sshAnom = cut.fields.ssh - sshMean;
     %% save
-    save(DD.path.meanSsh.file,'sshMean');
+    save(currentFile,'-struct','cut');
 end

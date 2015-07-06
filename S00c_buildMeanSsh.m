@@ -10,17 +10,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD,window)
     %% init
-    sshSum = nan(window.dimPlus.y,window.dimPlus.x);
+    prmt = @(x) permute(x,[3,1,2]);
+    sshSum = prmt(nan(window.dimPlus.y,window.dimPlus.x));
     files = DD.checks.passed;
     %% sum all SSH
     for ff = 1:numel(files) % TODO make parallel
         %% load
-        ssh = getfield(getfieldload(files(ff).filenames,'fields'),'ssh');
+        ssh = prmt(getfield(getfieldload(files(ff).filenames,'fields'),'ssh'));
         %% mean ssh
-        sshSum = nansum([sshSum, ssh],2);
+        sshSum = nansum([sshSum; ssh],1);
     end
     %% build mean
-    sshMean = sshSum./ numel(files); %#ok<NASGU>
+    sshMean = squeeze(sshSum)./ numel(files); %#ok<NASGU>
     %% save
     save(DD.path.meanSsh.file,'sshMean');
 end
