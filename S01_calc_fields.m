@@ -1,169 +1,66 @@
 % calculates geostrophic data from ssh
-% theoretically NEEDS FULL RE RUN IF DATES ARE CHANGED !!!!(meanSSH)
 function S01_calc_fields
     %% init
     DD = initialise('cuts');
     %% read input file
     window = getfieldload(DD.path.windowFile,'window');
     coriolis = coriolisStuff(window.lat);
-    RS = getRossbyStuff(DD);
     %% spmd
-    main(DD,RS,coriolis)
-    %% append coriolis to window file
-    window.coriolis = coriolis;
-    save(DD.map.windowFile,'window');
+    main(DD,coriolis,window)
+    %% save coriolis fields    
+    save(DD.path.coriolisFile,'coriolis');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function main(DD,RS,coriolis)
-    %% infer mean ssh
-    spmd(DD.threads.num)
-        [JJ] = SetThreadVar(DD);
-        spmd_meanSsh(DD,JJ);
-    end
-    MeanSsh = saveMean(DD);
-    % MeanSsh = getfield(load([DD.path.root, 'meanSSH.mat']),'MeanSsh');
-    %%
-    spmd(DD.threads.num)
-        [JJ] = SetThreadVar(DD);
-        spmd_fields(DD,RS,JJ,MeanSsh);
+function main(DD,coriolis,window)
+    %% init
+    files = DD.checks.passed;
+    %% loop
+    parfor ff = 1:numel(files)
+        loopOverCuts(coriolis,files,window,ff);
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function MeanSsh = saveMean(DD)
-    MeanSsh = nan(DD.map.window.dimPlus.y * DD.map.window.dimPlus.x,1);
-    Meancount = 0;
-    for ll = 1:DD.threads.num
-        cur = load(sprintf('meanTmp%03d.mat',ll));
-        MeanSsh = nansum([MeanSsh cur.Mean.SshSum],2);
-        Meancount = Meancount + cur.Mean.count;
-        system(sprintf('rm meanTmp%03d.mat',ll));
-    end
-    MeanSsh = reshape(MeanSsh,[DD.map.window.dimPlus.y, DD.map.window.dimPlus.x])/Meancount;
-    save([DD.path.root, 'meanSSH.mat'],'MeanSsh')
+function loopOverCuts(coriolis,files,window,ff)
+    currentFile = files(ff).filenames;
+    %% load
+    cut = load(currentFile);
+    %% calc
+    fields = geostrophy(window,cut.fields,coriolis); %#ok<NASGU>
+    %% write
+    save(currentFile,'fields','-append');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function RS = getRossbyStuff(DD)
-    RS.Lr = getfield(load([DD.path.Rossby.name DD.FieldKeys.Rossby.radius    '.mat']),'data');
-    RS.c = getfield(load([DD.path.Rossby.name DD.FieldKeys.Rossby.phaseSpeed '.mat']),'data');
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function spmd_meanSsh(DD,JJ)
-    T = disp_progress('init','infering mean ssh');
-    Mean.SshSum = nan(DD.map.window.dimPlus.y * DD.map.window.dimPlus.x,1);
-    for jj = 1:numel(JJ)
-        T = disp_progress('disp',T,numel(JJ),100);
-        %% load
-        cut=getfield(load(JJ(jj).files),'fields');
-        if isfield(cut,'sshRaw')
-            ssh = extractdeepfield(cut,'sshRaw')';
-        else
-            ssh = extractdeepfield(cut,'ssh')';
-        end
-        %% mean ssh
-        Mean.SshSum = nansum([Mean.SshSum, ssh],2);
-    end
-    Mean.count = numel(JJ);
-    save(sprintf('meanTmp%03d.mat',labindex),'Mean');
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function spmd_fields(DD,RS,JJ,MeanSsh)
-    T = disp_progress('init','infering fields');
-    for jj = 1:numel(JJ)
-        T = disp_progress('disp',T,numel(JJ),100);
-        
-        %         %% TODO
-        %         if getfield(dir(JJ(jj).files),'bytes')/1e6 > 300
-        %             continue
-        %         end
-        %%
-        
-        cut = load(JJ(jj).files);
-        %% filter
-        if DD.switchs.filterSSHinTime
-            %% already built
-            if isfield(cut.fields,'sshRaw')
-                %                 continue
-                cut.fields.ssh = cut.fields.sshRaw;
-            end
-            %% TODO
-            %             eddy = strrep(JJ(jj).files,'CUT','EDDIE');
-            %             try
-            %                 system(['rm ' eddy]);
-            %             catch nohave
-            %                 disp([nohave.message]) ;
-            %             end
-            %
-            %             cont = strrep(JJ(jj).files,'CUT','CONT');
-            %             try
-            %                 system(['rm ' cont]);
-            %             catch nohave
-            %                 disp([nohave.message]) ;
-            %             end
-            %%
-            cut.fields.sshRaw = cut.fields.ssh;
-            %% filter
-            cut.fields.ssh = cut.fields.ssh - MeanSsh;
-        end
-        %%
-        coriolis = coriolisStuff(DD.map.window.lat);
-        %% calc
-        fields = geostrophy(DD.map.window,cut.fields,coriolis,RS); %#ok<NASGU>
-        %% write
-        save(JJ(jj).files,'fields','-append');
-    end
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function gr = geostrophy(win,gr,corio,RS)
+function fields = geostrophy(window,fields,corio)
     %% ssh gradient
-    [gr.sshgrad_x,gr.sshgrad_y] = dsshdxi(gr.ssh,win.dx,win.dy);
+    [sshgrad_x,sshgrad_y] = dsshdxi(fields.ssh,window.dx,window.dy);
     %% velocities
-    gr.U = - corio.GOverF.*gr.sshgrad_y;
-    gr.V = corio.GOverF.*gr.sshgrad_x;
-    gr.absUV = hypot(abs(gr.U),abs(gr.V));
+    fields.U = -corio.GOverF .* sshgrad_y;
+    fields.V =  corio.GOverF .* sshgrad_x;
+    fields.absUV = hypot(abs(fields.U),abs(fields.V));
     %% 2d - deformation
-    %     def = deformation(gr);
-    %     gr.vorticity = def.dVdx - def.dUdy;
-    %     gr.divergence = def.dUdx + def.dVdy;
-    %     gr.stretch = def.dUdx - def.dVdy;
-    %     gr.shear = def.dVdx + def.dUdy;
-    %% okubo weiss
-    %     gr.OW = .5*( - gr.vorticity.*2 + gr.divergence.*2 + gr.stretch.*2 + gr.shear.*2);
-    %% or in 2d
-    %     gr.OW = 2*(def.dVdx.*def.dUdy + def.dUdx.^2);
-    %% assuming Ro = 1
-    if ~isempty(RS)
-        gr.L = gr.absUV./corio.f;
-        %         kinVis = 1e-6;
-        %         gr.Re = gr.absUV.*gr.L/kinVis;
-        %         gr.Ro = ones(size(gr.L));
-        %         gr.Rrhines = earthRadius./gr.L;
-        %         gr.Lrhines = sqrt(gr.absUV./corio.beta);
-        %         gr.L_R = abs(RS.c./corio.f);
-        %         gr.Bu = (gr.L_R./gr.L).^2;
-    end
-    % TODO build switches at top which ones to save
-    gr = rmfield(gr,{'sshgrad_x','sshgrad_y','U','V','absUV'});
-    
+    def = deformation(fields,window.dx,window.dy);
+    %% okubo weiss in 2d
+    fields.OkuboWeiss = 4*(def.dVdx .* def.dUdy + def.dUdx.^2);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function def = deformation(fields)
+function def = deformation(fields,dx,dy)
     %% calc U gradients
     dUdy = diff(fields.U,1,1);
     dUdx = diff(fields.U,1,2);
     dVdy = diff(fields.V,1,1);
     dVdx = diff(fields.V,1,2);
-    def.dUdy = dUdy([1:end, end], :)  ./ fields.dy;
-    def.dUdx = dUdx(:,[1:end, end] )  ./ fields.dx;
-    def.dVdy = dVdy([1:end, end], :)  ./ fields.dy;
-    def.dVdx = dVdx(:,[1:end, end] )  ./ fields.dx;
+    def.dUdy = dUdy([1:end, end], :)  ./ dy;
+    def.dUdx = dUdx(:,[1:end, end] )  ./ dx;
+    def.dVdy = dVdy([1:end, end], :)  ./ dy;
+    def.dVdx = dVdx(:,[1:end, end] )  ./ dx;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [dsshdx,dsshdy] = dsshdxi(ssh,dx,dy)
     %% calc ssh gradients
-    dsshdx = diff(ssh,1,2);
-    dsshdy = diff(ssh,1,1);
-    dsshdx = dsshdx(:,[1:end, end])./ dx;
-    dsshdy = dsshdy([1:end, end],:)./ dy;
+    dsshx = diff(ssh,1,2);
+    dsshy = diff(ssh,1,1);
+    dsshdx = dsshx(:,[1:end, end])./ dx;
+    dsshdy = dsshy([1:end, end],:)./ dy;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function out = coriolisStuff(lat)

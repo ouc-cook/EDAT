@@ -174,7 +174,7 @@ function PATH = findfiles(DD)
     patt = strsplit(DD.map.in.fname,'yyyymmdd');
     PATH.raw.files = dir2([PATH.raw.name,patt{1},'*']);
     PATH.protoMaps.file = [PATH.root, 'protoMaps.mat'];
-%     PATH.meanU.file = [PATH.root, 'meanU.mat'];
+    %     PATH.meanU.file = [PATH.root, 'meanU.mat'];
     PATH.meanSsh.file = [PATH.root, 'meanSSH.mat'];
     PATH.cuts.files = dir2([PATH.cuts.name,'*.mat']);
     PATH.conts.files = dir2([PATH.conts.name,'*.mat']);
@@ -182,8 +182,8 @@ function PATH = findfiles(DD)
     PATH.tracks.files = dir2([PATH.tracks.name,'*.mat']);
     PATH.Rossby.files = dir2([PATH.Rossby.name,'*.mat']);
     %%
-    
     PATH.windowFile = [PATH.root 'window.mat'];
+    PATH.coriolisFile = [PATH.root 'coriolis.mat'];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
