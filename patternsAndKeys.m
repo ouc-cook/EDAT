@@ -3,7 +3,7 @@ function [pattern,FieldKeys] = patternsAndKeys
     pattern.fname = 'CUT_yyyymmdd_SSS-NNN_WWW-EEE.mat';
     pattern.prefix.cuts = 'CUT';
     pattern.prefix.conts = 'CONT';
-    pattern.prefix.eddies = 'EDDIE';
+    pattern.prefix.eddies = 'EDDY';
     pattern.prefix.tracks = 'TRACK';
     %% fields that must end with .mean and .std - for output plot maps %
     FieldKeys.MeanStdFields =  { ...
