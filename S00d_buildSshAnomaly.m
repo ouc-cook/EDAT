@@ -12,6 +12,7 @@ function main(DD)
     files = DD.checks.passed;
     %% sum all SSH
     parfor ff = 1:numel(files)
+%         for ff = 1:numel(files)
         loopOverFiles(ff,files,sshMean)
     end
 end

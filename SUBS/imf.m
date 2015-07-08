@@ -1,16 +1,14 @@
 function imf(X,a,b)
     if nargin<3
-        a = nanmin(X(:))/2;
-        b = nanmax(X(:))/2;
+        a = nanmin(X(:));
+        b = nanmax(X(:));
     end
     X(isnan(X) | X==0) = -1e42;
-    imagesc(flipud(squeeze(X)));
+    pcolor(squeeze(X));
+    shading flat
     caxis([a b])
     CM = parula(100);
-    CM(1,:) = [1 1 1];
     colormap(CM);
     colorbar;
-    set(gcf,'windowstyle','docked')
-    
-    
+    set(gcf,'windowstyle','docked')   
 end

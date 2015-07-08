@@ -1,11 +1,5 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Created: 04-Sep-2014 16:53:06
-% Computer:  GLNX86
-% Matlab:  7.9
-% Author:  NK
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% sub to ../S00b_prep_raw_data
-function S00_main(DD,window,cc)
+% sub to ../S00a_prep_raw_data
+function S00a_main(DD,window,cc)
     %% get file name
     file.in    = DD.checks.passed(cc).filenames;
     timestring = DD.time.timesteps.s(cc,:);
@@ -32,7 +26,7 @@ function out=nanLand(in,fac)
     out(out==0)=nan;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function WriteFileOut(file,CUT) %#ok<INUSD>
+function WriteFileOut(file,CUT)  %#ok<INUSD>
     save(file,'-struct','CUT')
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

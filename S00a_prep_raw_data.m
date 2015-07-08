@@ -1,4 +1,4 @@
-function S00_prep_raw_data
+function S00a_prep_raw_data
     %% set up meta-data/info file "DD.mat"
     [DD, window] = set_up;
     %% main
@@ -6,9 +6,10 @@ function S00_prep_raw_data
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD, window)
-    for cc=1:DD.checks.passedTotal;
+    parfor cc=1:DD.checks.passedTotal;
+%     for cc=1:DD.checks.passedTotal;
         %% operate main
-        S00_main(DD,window,cc);
+        S00a_main(DD,window,cc);
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

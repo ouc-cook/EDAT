@@ -1,0 +1,7 @@
+S00a_prep_raw_data
+% S00b_rossbyStuff
+S00c_buildMeanSsh
+S00d_buildSshAnomaly
+S01_calc_fields
+S02_contours
+S03_filterContours

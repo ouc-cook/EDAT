@@ -162,7 +162,7 @@ function PATH = findfiles(DD)
     PATH.codesubs = [PATH.root, 'code/SUBS/'];
     PATH.cuts.name = [PATH.root, 'CUTS/'];
     PATH.conts.name = [PATH.root, 'CONTS/'];
-    PATH.eddies.name = [PATH.root,'EDDIES/'];
+    PATH.eddies.name = [PATH.root,'EDDYS/'];
     PATH.tracks.name = [PATH.root,'TRACKS/'];
     PATH.Rossby.name = [PATH.root,'ROSSBY/'];
     PATH.Rossby.Nfile = [PATH.Rossby.name,'N.cdf']; % TODO ?
@@ -173,8 +173,7 @@ function PATH = findfiles(DD)
     [~,~,ext.raw] = fileparts(DD.map.in.fname);
     patt = strsplit(DD.map.in.fname,'yyyymmdd');
     PATH.raw.files = dir2([PATH.raw.name,patt{1},'*']);
-    PATH.protoMaps.file = [PATH.root, 'protoMaps.mat'];
-    %     PATH.meanU.file = [PATH.root, 'meanU.mat'];
+    PATH.protoMaps.file = [PATH.root, 'protoMaps.mat'];   
     PATH.meanSsh.file = [PATH.root, 'meanSSH.mat'];
     PATH.cuts.files = dir2([PATH.cuts.name,'*.mat']);
     PATH.conts.files = dir2([PATH.conts.name,'*.mat']);
@@ -185,21 +184,18 @@ function PATH = findfiles(DD)
     PATH.windowFile = [PATH.root 'window.mat'];
     PATH.coriolisFile = [PATH.root 'coriolis.mat'];
 end
-
+% TODO save all as tempfiles eg CUTS etc too
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function mkDirs(path)
     %%
-    mkdirp(path.root);
-    %     mkdirp(path.plots);
+    mkdirp(path.root);  
     mkdirp(path.code);
     mkdirp(path.codesubs);
     mkdirp(path.cuts.name);
     mkdirp(path.conts.name);
     mkdirp(path.eddies.name);
-    mkdirp(path.tracks.name);
-    %     mkdirp(path.analyzed.name);
-    %     mkdirp(path.analyzedTracks.(senses{1}).name);
-    %     mkdirp(path.analyzedTracks.(senses{2}).name);
+    mkdirp([path.eddies.name,'tmp']);
+    mkdirp(path.tracks.name);  
     mkdirp(path.Rossby.name);
     %%
     system(['cp ./*.m ' path.code]);

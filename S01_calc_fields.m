@@ -15,7 +15,8 @@ function main(DD,coriolis,window)
     %% init
     files = DD.checks.passed;
     %% loop
-    parfor ff = 1:numel(files)
+%     for ff = 1:numel(files)
+        parfor ff = 1:numel(files)
         loopOverCuts(coriolis,files,window,ff);
     end
 end
