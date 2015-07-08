@@ -5,3 +5,4 @@ S00d_buildSshAnomaly
 S01_calc_fields
 S02_contours
 S03_filterContours
+S04_trackEddies
