@@ -14,6 +14,7 @@ function S03_filterContours
     rossby = getRossbyPhaseSpeedAndRadius(DD);
     %% spmd
     main(DD,rossby);
+    system('rm fopt.mat') % TODO
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD,rossby)
