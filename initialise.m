@@ -15,7 +15,7 @@ function DD = initialise(dataToCheck)
     %% scan for files and append
     DD.path = catstruct(DD.path,findfiles(DD));
     %% scan data 2 be checked
-    if ~isempty(dataToCheck)
+    if exist('dataToCheck','var')
         DD = checkData(DD,dataToCheck);
     end
     %% load workers
@@ -40,6 +40,8 @@ function DD = checkData(DD,toCheck)
     DD.time = initChecks(DD,toCheck);
     %% check for each needed file
     DD.time.passed = checkForFiles(DD.time);
+    % TODO throw warning about missing files and that delT will be altered
+    % accordingly!
     %% calc new del_t's in accord with missing files
     checks.del_t_full = buildNewDt(DD.time);
     %% append info
