@@ -11,9 +11,9 @@ end
 function main(DD,window)
     %% init
     prmt = @(x) permute(x,[3,1,2]);
-    sshSum = prmt(nan(window.dimPlus.y,window.dimPlus.x));
     files = DD.checks.passed;
     %% sum all SSH
+    sshSum = prmt(nan(window.dimPlus.y,window.dimPlus.x));
     for ff = 1:numel(files) % TODO make parallel
         %% load
         ssh = prmt(getfield(getfieldload(files(ff).filenames,'fields'),'ssh'));
@@ -25,3 +25,4 @@ function main(DD,window)
     %% save
     save(DD.path.meanSsh.file,'sshMean');
 end
+

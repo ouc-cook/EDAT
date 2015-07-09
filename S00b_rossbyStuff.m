@@ -10,23 +10,21 @@
 function S00b_rossbyStuff
     %% init
     DD = initialise([]);
-    save DD
-    % load DD
     %% set up
-    TS = S00b_rossbyStuff_setUp(DD);  
+    TS = S00b_rossbyStuff_setUp(DD);
     %% spmd
     main(TS,DD)
     %% make netcdf
-    WriteMatFile(DD,TS);    
+    WriteMatFile(DD,TS);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(TS,DD)
     spmd(DD.threads.num)
-        spmd_body(TS);
+        spmdBlock(TS);
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function spmd_body(TS)
+function spmdBlock(TS)
     id = labindex;
     lims = TS.lims.threads;
     %% loop over chunks
@@ -38,11 +36,11 @@ end
 % CK: current chunk
 function Calculations(TS,cc)
     %% pre-init
-    [CK,ccStr] = initPre(TS,cc,TS.dir);
-    %% init
+    [CK,ccStr] = preInit(TS,cc,TS.dir);
+    %% init worker's chunk
     CK = initChunK(CK,TS,cc);
     %% calculate Brunt-Väisälä f and potential vorticity
-    [CK.N]=calcBrvaPvort(CK,ccStr);
+    [CK.N]=calcN(CK,ccStr);
     %% integrate first baroclinic rossby radius
     [CK.rossby.(CK.R1Fname)]=calcRossbyRadius(CK,ccStr);
     %% rossby wave phase speed
@@ -59,7 +57,7 @@ function M=inf2nan(M)
     M(isinf(M))=nan;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [CK,ccStr]=initPre(TS,cc,RossbyDir)
+function [CK,ccStr]=preInit(TS,cc,RossbyDir)
     lims = TS.lims.chunks  - 1; % 1: to 0: system
     ccStr=[sprintf(['%0',num2str(length(num2str(size(lims,1)))),'i'],cc),'/',num2str(size(lims,1))];
     CK.fileSelf=[RossbyDir,'rossby_',sprintf('%03d',cc),'.mat'];
@@ -82,9 +80,9 @@ function WriteMatFile(DD,TS)
     for cc = 1:2
         %% fieldname / fileout name
         FN=TS.keys.(FF{cc});
-        MATfileName=[DD.path.Rossby.name FN '.mat'];      
+        MATfileName=[DD.path.Rossby.name FN '.mat'];
         saveField(TS,FN,MATfileName, oriData.window)
-    end   
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function saveField(TS,FN,MATfileName,oriWindow)
@@ -172,52 +170,57 @@ function [c1]=calcC_one(CK,ccStr)
     c1=-CK.rossby.beta.*CK.rossby.(CK.R1Fname).^2;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [N]=calcBrvaPvort(CK,ccStr)
-    [ZZ,YY,XX]=size(CK.TEMP);
+function [N] = calcN(CK,ccStr)
+    [ZZ,YY,XX] = size(CK.TEMP);
     dispM(['calculating brunt väisälä, chunk ',ccStr]);
     %% get full matrices for all variables
-    M.depth=double(repmat(CK.DEPTH,[1,YY*XX]));
-    M.lat=double(repmat(permute(CK.lat(:),[2 1]), [ZZ,1]));
-    M.pressure=double(reshape(sw_pres(M.depth(:),M.lat(:)),[ZZ,YY*XX]));
-    M.salt=double(reshape(CK.SALT,[ZZ,YY*XX]));
-    M.temp=double(reshape(CK.TEMP,[ZZ,YY*XX]));
-    %% get brunt väisälä frequency and pot vort
-    [brva,~,~]=sw_bfrq(M.salt,M.temp,M.pressure,M.lat);
-    brva(brva<0)=nan;
-    N=sqrt(reshape(brva,[ZZ-1,YY,XX]));
+    M.depth     = double(repmat(CK.DEPTH,[1,YY*XX]));
+    M.lat       = double(repmat(permute(CK.lat(:),[2 1]), [ZZ,1]));
+    M.pressure  = double(reshape(sw_pres(M.depth(:),M.lat(:)),[ZZ,YY*XX]));
+    M.salt      = double(reshape(CK.SALT,[ZZ,YY*XX]));
+    M.temp      = double(reshape(CK.TEMP,[ZZ,YY*XX]));
+    %% get brunt väisälä frequency
+    [N,~,~]  = sw_bfrq(M.salt,M.temp,M.pressure,M.lat);
+    N(N<0)   = nan;
+    N        = sqrt(reshape(N,[ZZ-1,YY,XX]));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [CK]=initChunK(CK,TS,chunkNum)
+function [CK]  = initChunK(CK,TS,chunkNum)
     CK.c1Fname = TS.keys.phaseSpeed;  % first long rossby wave phase speed
     CK.R1Fname = TS.keys.radius;      % first Rossby radius
     CK.chunk = chunkNum;
     CK.dim   = ncArrayDims(TS,chunkNum);
+    %%
     disp('getting temperature..')
     CK.TEMP = ChunkTempOrSalt(TS,CK.dim,'temp','TEMP',1);
+    %%
     disp('getting salt..')
     CK.SALT = ChunkTempOrSalt(TS,CK.dim,'salt','SALT',TS.salinityFactor);
+    %%
     disp('getting depth..')
-    CK.DEPTH=ChunkDepth(TS);
+    CK.DEPTH = ChunkDepth(TS);
+    %%
     disp('getting geo info..')
-    [CK.lat,CK.lon]=ChunkLatLon(TS,CK.dim);
+    [CK.lat,CK.lon] = ChunkLatLon(TS,CK.dim);
+    %%
     disp('getting coriolis stuff..')
-    [CK.rossby]=ChunkRossby(CK);
+    [CK.rossby] = ChunkRossby(CK);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [rossby]=ChunkRossby(CK)
+function [rossby] = ChunkRossby(CK)
     day_sid=23.9344696*60*60;
     om=2*pi/(day_sid); % frequency earth
     rossby.f=2*om*sind(CK.lat);
     rossby.beta=2*om/earthRadius*cosd(CK.lat);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [lat,lon]=ChunkLatLon(TS,dim)
+function [lat,lon] = ChunkLatLon(TS,dim)
     lat = ncreadOrNc_varget(TS.temp{1},TS.keys.lat,dim.start1d, dim.len1d);
     lon = ncreadOrNc_varget(TS.temp{1},TS.keys.lon,dim.start1d, dim.len1d);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function depth=ChunkDepth(TS)
-    depth=ncreadOrNc_varget(TS.salt{1},TS.keys.depth);
+function depth = ChunkDepth(TS)
+    depth = ncreadOrNc_varget(TS.salt{1},TS.keys.depth);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function out = ChunkTempOrSalt(TS,dim,fieldA,fieldB,fac)

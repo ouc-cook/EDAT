@@ -6,14 +6,14 @@ function S04_trackEddies
     %% rm old files
     rmoldtracks(DD)
     %% parallel!
-    %     init_threads(2);
+    init_threads(2);
     main(DD)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD)
-%         spmd(2)
-    spmd_part(DD)
-%         end
+    spmd(2)
+        spmdBlock(DD)
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function rmoldtracks(DD)
@@ -23,7 +23,7 @@ function rmoldtracks(DD)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function spmd_part(DD)
+function spmdBlock(DD)
     %% one thread do cycs, other acycs
     sen = DD.FieldKeys.senses{labindex};
     %% set up tracking procedure
@@ -287,21 +287,21 @@ function [LOM,LAM,passLog]=nanUnPassed(LOM,LAM,pass)
     LAM.new(~pass.combo) = nan;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [MD] = EligibleMinDistsMtrx(OLD,NEW,DD)    
+function [MD] = EligibleMinDistsMtrx(OLD,NEW,DD)
     %% build geo loc matrices
     [LOM.new,LOM.old] = meshgrid(NEW.lon  ,OLD.lon  );
     [LAM.new,LAM.old] = meshgrid(NEW.lat  ,OLD.lat  );
-    %%   
+    %%
     [~,pass.idc] = checkDynamicIdentity(OLD,NEW,DD.thresh.IdentityCheck);
     %%
     [pass.ellipseDist] = nanOutOfBounds(NEW.eddies ,OLD.eddies, DD.map.window.dim );
     %%
-    [LOM,LAM,~] = nanUnPassed(LOM,LAM,pass);   
+    [LOM,LAM,~] = nanUnPassed(LOM,LAM,pass);
     %% calc distances between all from new to all from old
     DIST = distance(LAM.new,LOM.new,LAM.old,LOM.old);
     %% find min dists
     [MD.new2old.dist,MD.new2old.idx] = min(DIST,[],1);
-    [MD.old2new.dist,MD.old2new.idx] = min(DIST,[],2);    
+    [MD.old2new.dist,MD.old2new.idx] = min(DIST,[],2);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [lon, lat] = get_geocoor(eddies)

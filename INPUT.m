@@ -5,20 +5,20 @@ function DD=INPUT
     %   DD.template='aviso';
     DD.template='pop';
     %% threads / debug
-    DD.threads.num = 18;
+    DD.threads.num = 22;
     %% overwrite data
     DD.overwrite = true;
     %% time
     DD.time.from.str  = '19940105'; %first pop/avi
-    DD.time.till.str  = '19950106';
+    DD.time.till.str  = '19980105';
     DD.time.delta_t   = 7; % [days]!
-    threshlife        = 3*7; % TODO
+    threshlife        = 6*7; 
     
     %% window on globe (0:360° system)
-    DD.map.in.west  =  -60;
-    DD.map.in.east  =  -30;
-    DD.map.in.south = 0;
-    DD.map.in.north =  30;
+    DD.map.in.west  =  0;
+    DD.map.in.east  =  360;
+    DD.map.in.south = -20;
+    DD.map.in.north =  -70;
     
     %% thresholds
     DD.contour.step                = 0.01; % [SI]

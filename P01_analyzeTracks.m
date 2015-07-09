@@ -1,6 +1,5 @@
 function P01_analyzeTracks
     DD = initialise();
-    %     window = getfieldload(DD.path.windowFile,'window');
     main(DD);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
