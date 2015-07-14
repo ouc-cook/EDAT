@@ -1,4 +1,4 @@
-function [win,lonlat]=GetWindow3(file,mapIn)   
+function [win,lonlat]=GetWindow3(file,mapIn)
     %% get lon and lat
     keyPattern.lat = mapIn.keys.lat;
     keyPattern.lon = mapIn.keys.lon;
@@ -48,6 +48,7 @@ end
 function [win,trip] = FindWindowMask(fields,M)
     %% init
     trip2any = @(in) any(reshape(in,size(in,1),[],3),3); % check for any of the 3 possibilties
+    if M.south > M.north , error('flip lat limits! wrong way arround!'),end
     glo      = fields.lon;
     trip.lon = [glo-360 glo glo+360];
     trip.lat = repmat(fields.lat,1,3);
@@ -100,7 +101,7 @@ function [win]=FindRectangle(win,lon,trip)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function limits = getLimits(Xnum,Xtrip,rows)
-    %% mod by Xnum to get relevant column for single map 
+    %% mod by Xnum to get relevant column for single map
     limits.west = mod(Xtrip.a.nonZero,Xnum);
     limits.east = mod(Xtrip.b.nonZero,Xnum);
     limits.east(limits.east==0) = Xnum; % full X case
@@ -109,7 +110,7 @@ function limits = getLimits(Xnum,Xtrip,rows)
     limits.south = find(rows,1,'first');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function type = detectType(lon,win,cols,x)     
+function type = detectType(lon,win,cols,x)
     mapIsGlobe = checkWhetherMapInSpansGlobe(lon,win);
     mapFlaggedFullyInX = all(cols~=0);
     if mapFlaggedFullyInX
@@ -120,8 +121,8 @@ function type = detectType(lon,win,cols,x)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function does = checkWhetherMapInSpansGlobe(lon,win)
-    does = false;     
-    lonDiff = median(median(diff(lon,1,2))); % look for average lon diff  
+    does = false;
+    lonDiff = median(median(diff(lon,1,2))); % look for average lon diff
     lonRange.min    = min(lon(win.flag));
     lonRange.max    = max(lon(win.flag));
     if lonRange.max - lonRange.min + lonDiff >=  360
@@ -142,7 +143,7 @@ function [type]=nonFullXCase(X,cols)
     boxCrossesZonalBndry        =   (X.a.nonZero==1 && X.b.nonZero==X.num && any(cols==0));
     boxBeginsAtWesternEdgeOfMap =   (X.a.nonZero==1 && X.b.nonZero~=X.num && X.b.Zero==X.num);
     boxEndsOnEasternEdge        =   (X.a.nonZero~=1 && X.b.nonZero==X.num && X.a.Zero==1);
-    %% 
+    %%
     if regularWindowOnMap
         type='normal';
     elseif boxCrossesZonalBndry

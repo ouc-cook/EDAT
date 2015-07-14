@@ -80,8 +80,8 @@ function WriteMatFile(DD,TS)
     for cc = 1:2
         %% fieldname / fileout name
         FN=TS.keys.(FF{cc});
-        MATfileName=[DD.path.Rossby.name FN '.mat'];
-        saveField(TS,FN,MATfileName, oriData.window)
+        MATfileName = [DD.path.Rossby.name FN '.mat'];
+        saveField(TS, FN, MATfileName, oriData.window)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

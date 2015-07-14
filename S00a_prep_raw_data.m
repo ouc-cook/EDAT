@@ -6,9 +6,8 @@ function S00a_prep_raw_data
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD, window)
-    parfor cc=1:DD.checks.passedTotal;
-%     for cc=1:DD.checks.passedTotal;
-        %% operate main
+    %% operate main
+    parfor cc=1:DD.checks.passedTotal
         S00a_main(DD,window,cc);
     end
 end

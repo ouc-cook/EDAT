@@ -16,13 +16,15 @@ function main(DD)
     %% init
     files = DD.checks.passed;
     %%
-    %     for ff = 1:numel(files)
+    parfor_progress(numel(files))
     parfor ff = 1:numel(files)
         get_contours(DD,files(ff));
     end
+    parfor_progress(0);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function get_contours(DD,file)
+    parfor_progress;
     CONT.filename = strrep(file.filenames,'CUT',DD.pattern.prefix.conts);
     %% check
     if exist(CONT.filename,'file') && ~DD.overwrite
@@ -40,8 +42,6 @@ end
 function [ssh,levels] = init_get_contours(increment,file)
     %% load cut
     ssh = getfield(getfield(load(file),'fields'),'sshAnom');
-    %% calc contours
-    disp('calculating contours... takes long time!')
     %% create level vector at chosen interval
     steplim.min = @(step,ssh) ceil(nanmin(ssh(:))/step) *step;
     steplim.max = @(step,ssh) floor(nanmax(ssh(:))/step)*step;

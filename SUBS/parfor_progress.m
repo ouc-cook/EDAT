@@ -1,5 +1,6 @@
-function percent = parfor_progress(N)
-%PARFOR_PROGRESS Progress monitor (progress bar) that works with parfor.
+% edited by NK
+%
+%   PARFOR_PROGRESS Progress monitor (progress bar) that works with parfor.
 %   PARFOR_PROGRESS works by creating a file called parfor_progress.txt in
 %   your working directory, and then keeping track of the parfor loop's
 %   progress within that file. This workaround is necessary because parfor
@@ -32,50 +33,69 @@ function percent = parfor_progress(N)
 %   See also PARFOR.
 
 % By Jeremy Scheff - jdscheff@gmail.com - http://www.jeremyscheff.com/
-
-error(nargchk(0, 1, nargin, 'struct'));
-
-if nargin < 1
-    N = -1;
+function parfor_progress(N)
+    
+    files.prog = '.parfor_progress.txt';
+    files.time = '.parfor_progress_time.txt';
+    
+    if exist('N','var')
+        if N > 0
+            initCase(N,files)
+        elseif N == 0
+            closeCase(files)
+        end
+    else
+        runningCase(files)
+    end
 end
 
-percent = 0;
-w = 50; % Width of progress bar
+function closeCase(files)
+    delete(files.prog);
+    delete(files.time);
+    disp('done');
+end
 
-if N > 0
-    f = fopen('parfor_progress.txt', 'w');
+function runningCase(files)
+    if ~exist(files.prog, 'file')
+        error('%s not found. Run PARFOR_PROGRESS(N) before PARFOR_PROGRESS to initialize %s.',files,files);
+    end
+    f = fopen(files.prog, 'a');
+    fprintf(f, '1\n');
+    fclose(f);
+    f = fopen(files.prog, 'r');
+    filedata = fscanf(f, '%d');
+    progress = filedata(2:end);
+    N = filedata(1);
+    fclose(f);
+    percent = (length(progress))/N*100;
+    
+    perc = sprintf('%3.0f%%', percent); % 4 characters wide, percentage
+%     disp([repmat(char(8), 1, (w+9)), char(10), perc, '[', repmat('=', 1, round(percent*w/100)), '>', repmat(' ', 1, w - round(percent*w/100)), ']']);
+    %%
+    
+    f = fopen(files.time, 'r');
+    initTime = str2double(fscanf(f, '%s'));
+    fclose(f);
+    timeSoFar  = now - initTime;
+    timeTotal  = timeSoFar/percent * 100;
+    timeToGo   = timeTotal - timeSoFar;
+    
+    timeToGoStr  =  datestr(timeToGo,'dd - HH:MM:SS');
+    fprintf('percent done: %s\nto go: %s\n',perc,timeToGoStr);
+end
+
+function initCase(N,files)
+    try
+        system(sprintf('rm %s %s',files.prog,files.time))
+    end
+    f = fopen(files.prog, 'w');
     if f<0
         error('Do you have write permissions for %s?', pwd);
     end
     fprintf(f, '%d\n', N); % Save N at the top of progress.txt
-    fclose(f);
     
-    if nargout == 0
-        disp(['  0%[>', repmat(' ', 1, w), ']']);
-    end
-elseif N == 0
-    delete('parfor_progress.txt');
-    percent = 100;
-    
-    if nargout == 0
-        disp([repmat(char(8), 1, (w+9)), char(10), '100%[', repmat('=', 1, w+1), ']']);
-    end
-else
-    if ~exist('parfor_progress.txt', 'file')
-        error('parfor_progress.txt not found. Run PARFOR_PROGRESS(N) before PARFOR_PROGRESS to initialize parfor_progress.txt.');
-    end
-    
-    f = fopen('parfor_progress.txt', 'a');
-    fprintf(f, '1\n');
-    fclose(f);
-    
-    f = fopen('parfor_progress.txt', 'r');
-    progress = fscanf(f, '%d');
-    fclose(f);
-    percent = (length(progress)-1)/progress(1)*100;
-    
-    if nargout == 0
-        perc = sprintf('%3.0f%%', percent); % 4 characters wide, percentage
-        disp([repmat(char(8), 1, (w+9)), char(10), perc, '[', repmat('=', 1, round(percent*w/100)), '>', repmat(' ', 1, w - round(percent*w/100)), ']']);
-    end
+    %%
+    f = fopen(files.time, 'w');
+    fprintf(f, '%6.5f\n', now); % Save N at the top of progress.txt
+    fclose(f);  
 end

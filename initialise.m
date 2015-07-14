@@ -15,7 +15,7 @@ function DD = initialise(dataToCheck)
     %% scan for files and append
     DD.path = catstruct(DD.path,findfiles(DD));
     %% scan data 2 be checked
-    if exist('dataToCheck','var')
+    if ~isempty(dataToCheck)
         DD = checkData(DD,dataToCheck);
     end
     %% load workers
@@ -159,7 +159,8 @@ end
 function PATH = findfiles(DD)
     %%
     PATH = DD.path;
-    PATH.root = ['../data' PATH.OutDirBaseName '/'];
+    PATH.base = fileparts(pwd);
+    PATH.root = sprintf('%s/data%s/',PATH.base,PATH.OutDirBaseName);
     PATH.code = [PATH.root, 'code/'];
     PATH.codesubs = [PATH.root, 'code/SUBS/'];
     PATH.cuts.name = [PATH.root, 'CUTS/'];
@@ -175,7 +176,7 @@ function PATH = findfiles(DD)
     [~,~,ext.raw] = fileparts(DD.map.in.fname);
     patt = strsplit(DD.map.in.fname,'yyyymmdd');
     PATH.raw.files = dir2([PATH.raw.name,patt{1},'*']);
-    PATH.protoMaps.file = [PATH.root, 'protoMaps.mat'];   
+    PATH.protoMaps.file = [PATH.root, 'protoMaps.mat'];
     PATH.meanSsh.file = [PATH.root, 'meanSSH.mat'];
     PATH.cuts.files = dir2([PATH.cuts.name,'*.mat']);
     PATH.conts.files = dir2([PATH.conts.name,'*.mat']);
@@ -190,15 +191,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function mkDirs(path)
     %%
-    mkdirp(path.root);  
+    mkdirp(path.root);
     mkdirp(path.code);
     mkdirp(path.codesubs);
-    mkdirp(path.cuts.name);
-    mkdirp(path.conts.name);
-    mkdirp(path.eddies.name);
-    mkdirp([path.eddies.name,'tmp']);
-    mkdirp(path.tracks.name);  
-    mkdirp(path.Rossby.name);
+    subdirs = {'cuts','conts','eddies','tracks','Rossby'};
+    for ss=1:numel(subdirs)
+        mkdirp(path.(subdirs{ss}).name);
+        mkdirp([path.(subdirs{ss}).name,'tmp']);
+    end
     %%
     system(['cp ./*.m ' path.code]);
     system(['cp ./SUBS/*.m ' path.codesubs]);

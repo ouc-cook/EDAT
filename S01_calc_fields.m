@@ -15,13 +15,15 @@ function main(DD,coriolis,window)
     %% init
     files = DD.checks.passed;
     %% loop
-    %     for ff = 1:numel(files)
+    parfor_progress(numel(files));
     parfor ff = 1:numel(files)
         loopOverCuts(coriolis,files,window,ff);
     end
+    parfor_progress(0);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function loopOverCuts(coriolis,files,window,ff)
+    parfor_progress;
     currentFile = files(ff).filenames;
     %% load
     cut = load(currentFile);

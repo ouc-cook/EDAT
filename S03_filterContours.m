@@ -18,17 +18,23 @@ function S03_filterContours
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD,rossby)
-    %%
     files = DD.checks.passed;
     %%
+    parfor_progress(numel(files));
     parfor ff = 1:numel(files)
-        %      for ff = 1:numel(files)
-        [EE,skip] = work_day(DD,files(ff),rossby);
-        %%
-        if skip,disp(['skipping ' EE.filename.self ]);   continue;end
-        %% save
-        save_eddies(EE);
+        parforBlock(DD,files(ff),rossby)
     end
+    parfor_progress(0);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function parforBlock(DD,fileff,rossby)
+    parfor_progress;
+    %%
+    [EE,skip] = work_day(DD,fileff,rossby);
+    %%
+    if skip,disp(['skipping ' EE.filename.self ]);   return;end
+    %% save
+    save_eddies(EE);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [EE,skip] = work_day(DD,file,rossby)
@@ -39,7 +45,7 @@ function [EE,skip] = work_day(DD,file,rossby)
     %% check for exisiting data
     if exist(EE.filename.eddy,'file') && ~DD.overwrite, skip = true; return; end
     %% load data
-    cut = load(EE.filename.cut);   % get ssh data
+    cut  = load(EE.filename.cut ); % get ssh data
     cont = load(EE.filename.cont); % get contours
     %% put all eddies into a struct: ee(number of eddies).fields
     contours = eddies2struct(cont.all,DD.thresh.corners);
@@ -134,7 +140,7 @@ function [pass,ee] = run_eddy_checks(pass,ee,rossby,cut,DD,direction)
     if ~pass.CR_2deddy, return, end;
     
     %% get sub map around eddy
-    [zoom,pass.winlim] = cutMaskOperation(ee.coor,6,window,cut.fields);
+    [zoom,pass.winlim] = cutMaskOperation(ee.coor,DD.parameters.zoomIncreaseFac,window,cut.fields);
     if ~pass.winlim, return, end;
     
     %% check for nans within eddy

@@ -11,10 +11,13 @@ function main(DD)
     sshMean = getfieldload(DD.path.meanSsh.file,'sshMean');
     files = DD.checks.passed;
     %% sum all SSH
-    parfor ff = 1:numel(files)
-%         for ff = 1:numel(files)
+    N = numel(files);
+    parfor_progress(N);
+    parfor ff = 1:N
+        parfor_progress;
         loopOverFiles(ff,files,sshMean)
     end
+    parfor_progress(0);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function loopOverFiles(ff,files,sshMean)
@@ -24,5 +27,7 @@ function loopOverFiles(ff,files,sshMean)
     %% subtract
     cut.fields.sshAnom = cut.fields.ssh - sshMean;
     %% save
-    save(currentFile,'-struct','cut');
+    tmpFN = [fileparts(currentFile) tempname '.mat'];
+    save(tmpFN,'-struct','cut');
+    system(sprintf('mv %s %s',tmpFN,currentFile));
 end
