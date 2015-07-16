@@ -1,10 +1,6 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Created: 04 - Apr - 2014 16:53:06
-% Computer:  GLNX86
-% Matlab:  7.9
-% Author:  NK
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% walks through all the contours and decides whether they qualify
+% walks through all the contours and decides whether they qualify.
+% saves per time-step one struct(numel(eddies)) as
+% ../dataXXX/EDDYS/EDDY_yyyymmdd_SSS-NNN_WWW-EEE.mat.
 function S03_filterContours
     %% init
     DD = initialise('conts');
@@ -14,7 +10,7 @@ function S03_filterContours
     rossby = getRossbyPhaseSpeedAndRadius(DD);
     %% spmd
     main(DD,rossby);
-    system('rm fopt.mat') % TODO
+    system('rm fopt.mat'); % TODO
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD,rossby)
@@ -32,7 +28,7 @@ function parforBlock(DD,fileff,rossby)
     %%
     [EE,skip] = work_day(DD,fileff,rossby);
     %%
-    if skip,disp(['skipping ' EE.filename.self ]);   return;end
+    if skip,disp(['skipping ' EE.filename.eddy ]);   return;end
     %% save
     save_eddies(EE);
 end

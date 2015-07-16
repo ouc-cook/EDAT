@@ -1,4 +1,11 @@
-% calculates geostrophic data from ssh
+% calculates geostrophic data from ssh.
+%
+% this is the first 'official' step.
+% input data MUST be of the form
+% ../dataXXX/CUTS/CUT_yyyymmdd_SSS-NNN_WWW-EEE.mat
+% with field .sshAnom
+%
+% also needed is ../dataXXX/window.mat as produced by S00a_prep_raw_data
 function S01_calc_fields
     %% init
     DD = initialise('cuts');
