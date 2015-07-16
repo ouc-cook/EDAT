@@ -1,4 +1,4 @@
-% subtract time-mean of SSH from SSH to build anomaly
+% subtract time-mean of SSH from SSH to build anomaly (.sshAnom)
 function S00d_buildSshAnomaly
     %% init
     DD = initialise('cuts');

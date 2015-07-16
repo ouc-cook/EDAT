@@ -86,7 +86,7 @@ end
 
 function initCase(N,files)
     try
-        system(sprintf('rm %s %s',files.prog,files.time))
+        system(sprintf('rm %s %s',files.prog,files.time));
     end
     f = fopen(files.prog, 'w');
     if f<0

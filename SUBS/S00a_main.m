@@ -1,5 +1,6 @@
 % sub to ../S00a_prep_raw_data
 function S00a_main(DD,window,cc)
+    parfor_progress;
     %% get file name
     file.in    = DD.checks.passed(cc).filenames;
     timestring = DD.time.timesteps.s(cc,:);

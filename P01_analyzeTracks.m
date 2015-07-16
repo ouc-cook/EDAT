@@ -1,19 +1,22 @@
 function P01_analyzeTracks
-    DD = initialise();
+    DD = initialise;
     main(DD);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD)
     tracks = DD.path.tracks.files;
+    parfor_progress(numel(tracks));
     parfor tt=1:numel(tracks)
         operateTrack(tracks(tt).fullname)
     end
+    parfor_progress(0);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function operateTrack(trackFile)
+    parfor_progress;
     track = load(trackFile);
     track.analyzed = alterTrack(track.track);
-    updateTrack(track,trackFile)
+    updateTrack(track,trackFile);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function updateTrack(track,trackFile) %#ok<INUSL>
@@ -22,9 +25,16 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function analy = alterTrack(track)
     %%
-    analy.dist = distanceStuff(track);
+    analy.dist       = distanceStuff(track);
     %%
-    analy.vel  = velocityStuff(analy.dist);
+    analy.daily.vel  = velocityStuff(analy.dist);
+    %%
+    analy.daily.geo  = geoStuff(analy);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function	[geo] = geoStuff(analy)    
+   geo.lat = spline(analy.dist.time,analy.dist.lat,analy.daily.vel.t');
+   geo.lon = spline(analy.dist.time,analy.dist.lon,analy.daily.vel.t');      
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[vel] = velocityStuff(dist)
@@ -36,11 +46,11 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [dist]=distanceStuff(track)
     zeroShift=@(x) x-x(1);
-    lat = extractdeepfield(track,'geo.lat');
-    lon = extractdeepfield(track,'geo.lon');
+    dist.lat = extractdeepfield(track,'geo.lat');
+    dist.lon = extractdeepfield(track,'geo.lon');
     %% get distance-from-birth components
-    dist.y = zeroShift(deg2km(lat)             );
-    dist.x = zeroShift(deg2km(lon).* cosd(lat) );
+    dist.y = zeroShift(deg2km(dist.lat)             );
+    dist.x = zeroShift(deg2km(dist.lon).* cosd(dist.lat) );
     dist.time = extractdeepfield(track,'daynum');
     %% build spline cfit to distance vectors
     dist.fit.y = fit(dist.time',dist.y','smoothingspline');

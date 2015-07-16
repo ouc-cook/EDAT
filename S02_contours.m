@@ -1,10 +1,5 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Created: 04-Apr-2014 16:53:06
-% Computer:  GLNX86
-% Matlab:  7.9
-% Author:  NK
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculates all contours minSSH:increment:maxSSH and saves one file per timestep
+% to ../dataXXX/CONTS/CONT_yyyymmdd_SSS-NNN_WWW-EEE.mat
 function S02_contours
     %% init
     DD = initialise('cuts');
