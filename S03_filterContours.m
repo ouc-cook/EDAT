@@ -32,7 +32,7 @@ function parforBlock(DD,fileff,rossby)
     %%
     [EE,skip] = work_day(DD,fileff,rossby);
     %%
-    if skip,disp(['skipping ' EE.filename.self ]);   return;end
+    if skip,disp(['skipping ' EE.filename.eddy ]);   return;end
     %% save
     save_eddies(EE);
 end
