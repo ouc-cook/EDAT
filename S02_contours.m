@@ -11,6 +11,7 @@ function main(DD)
     %% init
     files = DD.checks.passed;
     %%
+    % TODO back to spmd
     parfor_progress(numel(files))
     parfor ff = 1:numel(files)
         get_contours(DD,files(ff));

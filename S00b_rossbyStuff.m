@@ -9,7 +9,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function S00b_rossbyStuff
     %% init
-    DD = initialise([]);
+    DD = initialise();
     %% set up
     TS = S00b_rossbyStuff_setUp(DD);
     %% spmd
