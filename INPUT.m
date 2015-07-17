@@ -42,4 +42,6 @@ function DD=INPUT
     DD.parameters.trackingRef      = 'CenterOfVolume'; % choices: 'centroid', 'CenterOfVolume', 'Peak'
     DD.parameters.rossbySpeedFactor= 1.75; % eddy translation speed assumed factor*rossbyWavePhaseSpeed for tracking projections
     
+    %%
+    DD.map.out.binSize = 1;
 end
