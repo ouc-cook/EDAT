@@ -6,7 +6,7 @@ function DD=INPUT
     DD.template = 'pop';
     
     %% threads / debug
-    DD.threads.num = 22;
+    DD.threads.num = 2;
     
     %% overwrite data
     DD.overwrite = false;
@@ -15,7 +15,7 @@ function DD=INPUT
     DD.time.from.str  = '19940105'; %first pop/avi
     DD.time.till.str  = '19980105';
     DD.time.delta_t   = 7; % [days]!
-    threshlife        = 5*7;
+    threshlife        = 16*7;
     
     %% window on globe (0:360° system)
     DD.map.in.west  =  0;

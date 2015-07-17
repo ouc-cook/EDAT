@@ -73,9 +73,9 @@ function [tracks,NEW]=append_tracked(TDB,tracks,OLD,NEW)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     age = num2cell(cat(2,tracks(idx.arch).age) + NEW.time.delT); % get new age
     %% set
-    [NEW.eddies(flag.new).ID] = deal(IDc{:}); % set ID accordingly for new data
-    [NEW.eddies(flag.new).age] = deal(age{:}); % set age accordingly for new data
-    [tracks(idx.arch).age]= deal(age{:});		% update age in archive
+    [NEW.eddies(flag.new).ID]  = deal(IDc{:});     % set ID accordingly for new data
+    [NEW.eddies(flag.new).age] = deal(age{:});     % set age accordingly for new data
+    [tracks(idx.arch).age]     = deal(age{:});	   % update age in archive
     %% append tracks into track cells
     idx.new=find(flag.new);
     for aa=1:length(idx.arch)
