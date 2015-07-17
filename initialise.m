@@ -5,7 +5,7 @@
 % Author:  NK
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % dataToCheck - either raw,CUTS,CONTS etc
-function DD = initialise(dataToCheck)
+function DD = initialise(dataToScan)
     %% basic settings
     %     preInits;
     %% user input
@@ -15,8 +15,9 @@ function DD = initialise(dataToCheck)
     %% scan for files and append
     DD.path = catstruct(DD.path,findfiles(DD));
     %% scan data 2 be checked
-    if ~isempty(dataToCheck)
-        DD = checkData(DD,dataToCheck);
+    if nargin>0
+%     if ~isempty(dataToScan)
+        DD = checkData(DD,dataToScan);
     end
     %% load workers
     DD.threads.num = init_threads(DD.threads.num);

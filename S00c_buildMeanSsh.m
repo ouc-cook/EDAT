@@ -1,4 +1,9 @@
 % build time-mean of SSH
+% mean of SSH is saved to ../dataXXX/meanSSH.mat
+% skip this and S00d_buildSshAnomaly if input data is SSH anomaly already
+% (eg aviso)
+% TODO implement skipping (see above) ie .ssh must be called .sshAnom a
+% priori somehow
 function S00c_buildMeanSsh
     %% init
     DD = initialise('cuts');

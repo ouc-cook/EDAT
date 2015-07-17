@@ -9,7 +9,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function S00b_rossbyStuff
     %% init
-    DD = initialise([]);
+    DD = initialise();
     %% set up
     TS = S00b_rossbyStuff_setUp(DD);
     %% spmd
@@ -86,7 +86,6 @@ function WriteMatFile(DD,TS)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function saveField(TS,FN,MATfileName,oriWindow)
-    %% start from scratch
     %% dummy init
     data = nan([TS.window.dimPlus.y, TS.window.dimPlus.x]);   %#ok<NASGU>
     save(MATfileName,'data','-v7.3');
@@ -118,7 +117,7 @@ end
 function differentGeoCase(TS,MATfileName,oriWindow)
     %% in
     lims = TS.window.limits;
-    getFlag=@(lims,M) double(M(lims.south:lims.north,lims.west:lims.east));
+    getFlag = @(lims,M) double(M(lims.south:lims.north,lims.west:lims.east));
     %%
     in.lat = getFlag(lims,ncreadOrNc_varget(TS.salt{1},TS.keys.lat,[1 1],[inf inf]));
     in.lon = getFlag(lims,ncreadOrNc_varget(TS.salt{1},TS.keys.lon,[1 1],[inf inf]));
@@ -131,7 +130,7 @@ function differentGeoCase(TS,MATfileName,oriWindow)
     out.lat = oriWindow.lat;
     out.lon = oriWindow.lon;
     %% resample
-    data=griddata(in.lon,in.lat,in.data,out.lon,out.lat); %#ok<NASGU>
+    data = griddata(in.lon,in.lat,in.data,out.lon,out.lat); %#ok<NASGU>
     %% save
     save(MATfileName,'data');
 end
@@ -151,23 +150,23 @@ function saveChunk(CK)
     save(CK.fileSelf,'-struct','CK');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function CK=loadChunk(RossbyDir,cc,field)
-    file_in=[RossbyDir,'rossby_',sprintf('%03d',cc),'.mat'];
-    CK=getfield(load(file_in,field),field);
+function CK = loadChunk(RossbyDir,cc,field)
+    file_in = [RossbyDir,'rossby_',sprintf('%03d',cc),'.mat'];
+    CK = getfield(load(file_in,field),field);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function Lr=	calcRossbyRadius(CK,ccStr)
+function Lr = calcRossbyRadius(CK,ccStr)
     dispM(['integrating Rossby Radius for chunk ',ccStr],1)
-    [~,YY,XX]=size(CK.N);
-    M.depthdiff=repmat(diff(CK.DEPTH),[1 YY XX]);
+    [~,YY,XX] = size(CK.N);
+    M.depthdiff = repmat(diff(CK.DEPTH),[1 YY XX]);
     % R = 1/(pi f) int N dz
-    Lr=abs(double((squeeze(nansum(M.depthdiff.*CK.N,1))./CK.rossby.f)/pi));
+    Lr = abs(double((squeeze(nansum(M.depthdiff.*CK.N,1))./CK.rossby.f)/pi));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [c1]=calcC_one(CK,ccStr)
+function [c1] = calcC_one(CK,ccStr)
     %    c=-beta/(k^2+(1/L_r)^2) approx -beta*L^2
     dispM(['applying long rossby wave disp rel for c1 for chunk ',ccStr])
-    c1=-CK.rossby.beta.*CK.rossby.(CK.R1Fname).^2;
+    c1 = -CK.rossby.beta.*CK.rossby.(CK.R1Fname).^2;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [N] = calcN(CK,ccStr)

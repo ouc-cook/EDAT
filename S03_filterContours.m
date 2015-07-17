@@ -1,10 +1,6 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Created: 04 - Apr - 2014 16:53:06
-% Computer:  GLNX86
-% Matlab:  7.9
-% Author:  NK
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% walks through all the contours and decides whether they qualify
+% walks through all the contours and decides whether they qualify.
+% saves per time-step one struct(numel(eddies)) as
+% ../dataXXX/EDDYS/EDDY_yyyymmdd_SSS-NNN_WWW-EEE.mat.
 function S03_filterContours
     %% init
     DD = initialise('conts');
@@ -14,14 +10,14 @@ function S03_filterContours
     rossby = getRossbyPhaseSpeedAndRadius(DD);
     %% spmd
     main(DD,rossby);
-    system('rm fopt.mat') % TODO
+    system('rm fopt.mat'); % TODO
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD,rossby)
     files = DD.checks.passed;
     %%
     parfor_progress(numel(files));
-    parfor ff = 1:numel(files)
+    for ff = 1:numel(files)
         parforBlock(DD,files(ff),rossby)
     end
     parfor_progress(0);
@@ -588,7 +584,9 @@ function mask = eddyCut_mask(zoom)
     %% inside
     querypoints = [queryX,queryY];
     node = struct2array(zoom.coor.exact);
+   
     insideLin = queryLin(inpoly(querypoints,node)); % MAIN BOTTLENECK!!!!!
+  
     mask.inside = dummymask;
     mask.inside(insideLin) = true;
     %% on rim
