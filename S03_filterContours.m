@@ -17,7 +17,7 @@ function main(DD,rossby)
     files = DD.checks.passed;
     %%
     parfor_progress(numel(files));
-    parfor ff = 1:numel(files)
+    for ff = 1:numel(files)
         parforBlock(DD,files(ff),rossby)
     end
     parfor_progress(0);
@@ -584,7 +584,9 @@ function mask = eddyCut_mask(zoom)
     %% inside
     querypoints = [queryX,queryY];
     node = struct2array(zoom.coor.exact);
+   
     insideLin = queryLin(inpoly(querypoints,node)); % MAIN BOTTLENECK!!!!!
+  
     mask.inside = dummymask;
     mask.inside(insideLin) = true;
     %% on rim

@@ -34,10 +34,10 @@
 
 % By Jeremy Scheff - jdscheff@gmail.com - http://www.jeremyscheff.com/
 function parfor_progress(N)
-    
+
     files.prog = '.parfor_progress.txt';
     files.time = '.parfor_progress_time.txt';
-    
+
     if exist('N','var')
         if N > 0
             initCase(N,files)
@@ -68,34 +68,34 @@ function runningCase(files)
     N = filedata(1);
     fclose(f);
     percent = (length(progress))/N*100;
-    
+
     perc = sprintf('%3.0f%%', percent); % 4 characters wide, percentage
 %     disp([repmat(char(8), 1, (w+9)), char(10), perc, '[', repmat('=', 1, round(percent*w/100)), '>', repmat(' ', 1, w - round(percent*w/100)), ']']);
     %%
-    
+
     f = fopen(files.time, 'r');
     initTime = str2double(fscanf(f, '%s'));
     fclose(f);
     timeSoFar  = now - initTime;
     timeTotal  = timeSoFar/percent * 100;
     timeToGo   = timeTotal - timeSoFar;
-    
+
     timeToGoStr  =  datestr(timeToGo,'dd - HH:MM:SS');
     fprintf('percent done: %s\nto go: %s\n',perc,timeToGoStr);
 end
 
 function initCase(N,files)
-    try
-        system(sprintf('rm %s %s',files.prog,files.time));
-    end
+
+		system(sprintf('rm -f %s %s',files.prog,files.time));
+
     f = fopen(files.prog, 'w');
     if f<0
         error('Do you have write permissions for %s?', pwd);
     end
     fprintf(f, '%d\n', N); % Save N at the top of progress.txt
-    
+
     %%
     f = fopen(files.time, 'w');
     fprintf(f, '%6.5f\n', now); % Save N at the top of progress.txt
-    fclose(f);  
+    fclose(f);
 end
