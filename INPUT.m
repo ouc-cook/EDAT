@@ -6,7 +6,7 @@ function DD=INPUT
     DD.template = 'pop';
 
     %% threads / debug
-    DD.threads.num = 8;
+    DD.threads.num = 22;
 
     %% overwrite data
     DD.overwrite = false;
@@ -42,4 +42,7 @@ function DD=INPUT
     DD.parameters.trackingRef      = 'CenterOfVolume'; % choices: 'centroid', 'CenterOfVolume', 'Peak'
     DD.parameters.rossbySpeedFactor= 1.75; % eddy translation speed assumed factor*rossbyWavePhaseSpeed for tracking projections
 
+    %%
+    DD.map.out.binSize = 1;
+    
 end

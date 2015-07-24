@@ -1,5 +1,5 @@
 function P02_analyzedTracks2maps
-   TODO
+   
     DD = initialise;
     window = getfieldload(DD.path.windowFile,'window');
     main(DD,window);
@@ -9,18 +9,18 @@ function main(DD,window)
     %%
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
-    %     writeToTxtFiles(txtFileName,FN,tracks);
-    %%  TODO
-    %     buildNetCdfFromTxtFiles(FN,txtFileName)
-    %%
-    %     meanMap =  initMeanMaps(DD,window);
-    %%
-    %     meanMap = buildMeanMaps(meanMap,FN,txtFileName); %#ok<NASGU>
+%         writeToTxtFiles(txtFileName,FN,tracks);
+    %  TODO
+%         buildNetCdfFromTxtFiles(FN,txtFileName)
+    %
+        meanMap =  initMeanMaps(DD,window);
+    %
+        meanMap = buildMeanMaps(meanMap,FN,txtFileName,DD.threads.num); %#ok<NASGU>
     %%
     meanMap.birthDeath = buildBirthDeathMaps(tracks);
     %%
-    save(DD.path.analyzed,'meanMaps.mat','meanMap');
-    
+    save([DD.path.root,'meanMaps.mat'],'meanMap');
+    a = load([DD.path.root,'meanMaps.mat']);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function BD = buildBirthDeathMaps(tracks)
@@ -42,7 +42,7 @@ end
 function map = initMeanMaps(DD,window)
     geo = window.geo;
     bs  = DD.map.out.binSize;
-    %%
+    %% 
     rlvec   = @(a,len,inc) round(a*inc)/inc:inc:inc*len ;
     xvec    = rlvec(geo.west,geo.east,bs);
     yvec    = rlvec(geo.south,geo.north,bs);
@@ -76,7 +76,7 @@ function buildNetCdfFromTxtFiles(FN,txtFileName)
     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName)
+function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName,threads)
     %% init
     [Y,X] = size(meanMaps.lat);
     meanMaps.count = zeros(Y,X);
@@ -85,20 +85,39 @@ function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName)
     meanMaps.scale = zeros(Y,X);
     %% read lat lon vectors
     lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
-    lon = fscanf(fopen(txtFileName.lon, 'r'), '%f ');
-    %% find index in output geometry
-    [LAT1, LAT2] = meshgrid(lat,meanMaps.lat(:,1));
-    [~,idx.y]    = min(abs(LAT1-LAT2),[],1);
-    [LON1, LON2] = meshgrid(lon,meanMaps.lon(1,:));
-    [~,idx.x]    = min(abs(LON1-LON2),[],1);
-    idx.lin      = drop_2d_to_1d(idx.y,idx.x,Y);
+    lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
+    %% find index in output geometry   
+    lalo = lon + 1i*lat;
+    Mlalo = reshape(meanMaps.lon + 1i*meanMaps.lat,[],1);    
+    idxlin = nan(size(lalo));  
+    
+    lims = thread_distro(threads,numel(lalo));    
+    spmd(threads) 
+        T = disp_progress('init','blibb');
+        for ii=lims(labindex,1):lims(labindex,2)
+            T = disp_progress('blubb',T,diff(lims(labindex,:)),1000);
+            [minA,minAidx] = min(abs(lalo(ii)-Mlalo)) ;
+            [minB,minBidx] = min(abs(lalo(ii)-Mlalo+360)) ;
+            if minA < minB
+                idxlin(ii) = minAidx;
+            else
+                idxlin(ii) = minBidx;
+            end          
+        end
+        idxx = gop(@horzcat,idxlin,1);
+    end  
+    idxx = idxx{1};
+    idxlin = nansum(idxx,2);
+    
+       
     %% read parameters
-    u     = fscanf(fopen(txtFileName.u, 'r'), '%e ');
-    v     = fscanf(fopen(txtFileName.v, 'r'), '%e ');
+    u     = fscanf(fopen(txtFileName.u, 'r'),     '%e ');
+    v     = fscanf(fopen(txtFileName.v, 'r'),     '%e ');
     scale = fscanf(fopen(txtFileName.scale, 'r'), '%e ');
     %% sum over parameters for each grid cell
+    % TODO make faster
     for kk = 1:X*Y
-        flag = (idx.lin == kk);
+        flag = (idxlin == kk);
         meanMaps.count(kk) = meanMaps.count(kk) + sum(flag);
         meanMaps.u(kk) = meanMaps.u(kk) + sum(u(flag));
         meanMaps.v(kk) = meanMaps.v(kk) + sum(v(flag));
@@ -113,6 +132,7 @@ function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName)
     uv               = meanMaps.u + 1i * meanMaps.v;
     meanMaps.absUV   = abs(uv) ;
     meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

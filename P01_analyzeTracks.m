@@ -6,7 +6,7 @@ end
 function main(DD)
     tracks = DD.path.tracks.files;
     parfor_progress(numel(tracks));
-    parfor tt=1:numel(tracks)
+    for tt=1:numel(tracks)
         operateTrack(tracks(tt).fullname)
     end
     parfor_progress(0);
@@ -53,6 +53,7 @@ end
 function	[geo] = geoStuff(analy)
     geo.lat = spline(analy.time,analy.dist.lat,analy.daily.time');
     geo.lon = spline(analy.time,analy.dist.lon,analy.daily.time');
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[scale] = scaleStuff(track,analy)

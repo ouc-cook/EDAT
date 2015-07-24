@@ -4,16 +4,14 @@
 % Matlab:  7.9
 % Author:  NK
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [T]=disp_progress(type,Tin,L,num_prints,inner)
-    if nargin==3
+function [T] = disp_progress(type,Tin,L,num_prints,inner)
+    if nargin == 3
         num_prints=L;
     end
     if nargin<5
         inner=0;
     end
-    if strcmp(type,'conclude')
-        conclude; T=[]; return
-    end
+  
     %%
     if labindex == 1
         switch type
@@ -26,42 +24,6 @@ function [T]=disp_progress(type,Tin,L,num_prints,inner)
         T=[];return
     end
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function conclude
-    %% wait for all workers
-    labBarrier
-    %% let master handle I/O
-    if labindex == 1
-        c=initc;
-        for cc=2:c.num
-            echoHis(c,cc);
-        end
-    end
-    %% wait for all workers
-    labBarrier
-    %----------------------------------------------------------------------
-    function c=initc
-        c.files=dir('./.comm*');
-        c.num=numel(c.files);
-        sprintf('...going to read out all old recently collected mails from all threads(id>1)...\n' )
-    end
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function echoHis(c,cc)
-    d=matfile(c.files(cc).name,'writable',true);
-    tit=cell2mat(d.printstack(1,1));
-    sprintf('reading disp stack for %s:\n\n', tit);
-    for ii=2:numel(d.printstack)
-        tot=cell2mat(d.printstack(ii,1));
-        %% echo
-        if numel(tot)>12
-            cprintf(rainbow(1,1,1,cc-1,c.num-1),[tit ':\n' tot ' \n']); disp('')
-        end
-        %% recycle
-        d.printstack(ii,1)={[]};
-    end
-end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function T=init(Tin,inner)
     T.cc=0;
