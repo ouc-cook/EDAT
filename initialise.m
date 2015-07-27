@@ -7,7 +7,7 @@
 % dataToCheck - either raw,CUTS,CONTS etc
 function DD = initialise(dataToScan)
     %% basic settings
-    %     preInits;
+        preInits;
     %% user input
     DD = getUserInput;
     %% append time info
@@ -25,8 +25,9 @@ function DD = initialise(dataToScan)
     dispFileStatus(DD.path)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function preInits %#ok<DEFNU>
+function preInits 
     addpath(genpath('./'));
+    addpath(genpath('~/matlabFunctions'));
     rehash;
     clc;
     format shortg;

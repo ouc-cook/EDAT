@@ -1,5 +1,5 @@
 function P02_analyzedTracks2maps
-   
+    
     DD = initialise;
     window = getfieldload(DD.path.windowFile,'window');
     main(DD,window);
@@ -9,13 +9,13 @@ function main(DD,window)
     %%
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
-%         writeToTxtFiles(txtFileName,FN,tracks);
+    writeToTxtFiles(txtFileName,FN,tracks);
     %  TODO
-%         buildNetCdfFromTxtFiles(FN,txtFileName)
+    %         buildNetCdfFromTxtFiles(FN,txtFileName)
     %
-        meanMap =  initMeanMaps(window);
+    meanMap =  initMeanMaps(window);
     %
-        meanMap = buildMeanMaps(meanMap,FN,txtFileName,DD.threads.num); %#ok<NASGU>
+    meanMap = buildMeanMaps(meanMap,FN,txtFileName,DD.threads.num); %#ok<NASGU>
     %%
     meanMap.birthDeath = buildBirthDeathMaps(tracks);
     %%
@@ -89,24 +89,14 @@ function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName,threads)
     %% read lat lon vectors
     lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
     lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
-    %% find index in output geometry   
-           
-%   lonidx = round(lon) - meanMaps.lon(1)+1;
-%   lonidx(lonidx > meanMaps.lon(end))=meanMaps.lon(1);
-%   lonidx(lonidx < 1) = lonidx(lonidx < 1) + meanMaps.lon(end); 
-%   
-%   latidx = round(lat) - meanMaps.lat(1)+1;
-%   
-%   idxlin = drop_2d_to_1d(latidx,lonidx,Y);
-  
-  
-    
+    %% find index in output geometry
+        
     lalo = lon + 1i*lat;
-    Mlalo = reshape(meanMaps.lon + 1i*meanMaps.lat,[],1);    
-    idxlin = nan(size(lalo));  
+    Mlalo = reshape(meanMaps.lon + 1i*meanMaps.lat,[],1);
+    idxlin = nan(size(lalo));
     
-    lims = thread_distro(threads,numel(lalo));    
-    spmd(threads) 
+    lims = thread_distro(threads,numel(lalo));
+    spmd(threads)
         T = disp_progress('init','blibb');
         for ii=lims(labindex,1):lims(labindex,2)
             T = disp_progress('blubb',T,diff(lims(labindex,:)),1000);
@@ -116,14 +106,14 @@ function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName,threads)
                 idxlin(ii) = minAidx;
             else
                 idxlin(ii) = minBidx;
-            end          
+            end
         end
         idxx = gop(@horzcat,idxlin,1);
-    end  
+    end
     idxx = idxx{1};
     idxlin = nansum(idxx,2);
     
-       
+    
     %% read parameters
     u     = fscanf(fopen(txtFileName.u, 'r'),     '%e ');
     v     = fscanf(fopen(txtFileName.v, 'r'),     '%e ');
@@ -132,7 +122,7 @@ function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName,threads)
     % TODO make faster
     
     for kk = 1:X*Y
-    fprintf('%2.1f%%\n',round(1000*kk/X/Y)/10)
+        fprintf('%2.1f%%\n',round(1000*kk/X/Y)/10)
         flag = (idxlin == kk);
         meanMaps.count(kk) = meanMaps.count(kk) + sum(flag);
         meanMaps.u(kk) = meanMaps.u(kk) + sum(u(flag));
@@ -165,8 +155,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function writeToTxtFiles(txtFileName,FN,tracks)
     %% open files
+    
     for ii=1:numel(FN); fn = FN{ii};
-        f.(fn) = fopen(txtFileName.(fn), 'a');
+        system(sprintf('rm -f %s',txtFileName.(fn)));
+        f.(fn) = fopen(txtFileName.(fn), 'w');
     end
     %% write parameters to respective files
     for tt=1:1:numel(tracks)

@@ -6,21 +6,21 @@ function DD=INPUT
     DD.template = 'pop';
 
     %% threads / debug
-    DD.threads.num = 22;
+    DD.threads.num = 8;
 
     %% overwrite data
     DD.overwrite = false;
 
     %% time
     DD.time.from.str  = '19940105'; %first pop/avi
-    DD.time.till.str  = '19980105';
+    DD.time.till.str  = '19950105';
     DD.time.delta_t   = 7; % [days]!
-    threshlife        = 16*7;
+    threshlife        = 3*7;
 
     %% window on globe (0:360° system)
-    DD.map.in.west  =  0;
-    DD.map.in.east  =  360;
-    DD.map.in.south = -70;
+    DD.map.in.west  =  130;
+    DD.map.in.east  =  160;
+    DD.map.in.south = -50;
     DD.map.in.north = -20;
 
     %% thresholds
@@ -28,8 +28,8 @@ function DD=INPUT
     DD.thresh.maxRadiusOverRossbyL = 4; %[ ]
     DD.thresh.minRossbyRadius      = 20e3; %[SI]
     DD.thresh.amp                  = DD.contour.step; % [SI]
-    DD.thresh.shape.iq             = 0.5; % isoperimetric quotient [ ]
-    DD.thresh.corners.min          = 10; % min number of data points for the perimeter of an eddy[ ]
+    DD.thresh.shape.iq             = 0.55; % isoperimetric quotient [ ]
+    DD.thresh.corners.min          = 15; % min number of data points for the perimeter of an eddy[ ]
     DD.thresh.corners.max          = 500; % dont make too small! [ ]
     DD.thresh.life                 = threshlife; % min num of living days for saving [days]
     DD.thresh.IdentityCheck        = 2; % 1: perfect fit, 2: 100% change ie factor 2 in either sigma or amp
