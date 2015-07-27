@@ -68,13 +68,13 @@ function	[vel,dailyTime] = velocityStuff(dist,time)
     vel.v = kmPd2mPs(differentiate(dist.fit.y, dailyTime));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [dist,time]=distanceStuff(track)
+function [dist,time] = distanceStuff(track)
     zeroShift=@(x) x-x(1);
     dist.lat = extractdeepfield(track,'geo.lat');
     dist.lon = extractdeepfield(track,'geo.lon');
     %% get distance-from-birth components
-    dist.y = zeroShift(deg2km(dist.lat)             );
-    dist.x = zeroShift(deg2km(dist.lon).* cosd(dist.lat) );
+    dist.y = deg2km(zeroShift(dist.lat)                  );
+    dist.x = deg2km(zeroShift(wrapTo360(dist.lon)).* cosd(dist.lat) );
     time = extractdeepfield(track,'daynum');
     %% build spline cfit to distance vectors
     dist.fit.y = fit(time',dist.y','smoothingspline');

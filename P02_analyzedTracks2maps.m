@@ -13,7 +13,7 @@ function main(DD,window)
     %  TODO
 %         buildNetCdfFromTxtFiles(FN,txtFileName)
     %
-        meanMap =  initMeanMaps(DD,window);
+        meanMap =  initMeanMaps(window);
     %
         meanMap = buildMeanMaps(meanMap,FN,txtFileName,DD.threads.num); %#ok<NASGU>
     %%
@@ -39,13 +39,16 @@ function BD = buildBirthDeathMaps(tracks)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % init output map dim
-function map = initMeanMaps(DD,window)
+function map = initMeanMaps(window)
     geo = window.geo;
-    bs  = DD.map.out.binSize;
-    %% 
-    rlvec   = @(a,len,inc) round(a*inc)/inc:inc:inc*len ;
-    xvec    = rlvec(geo.west,geo.east,bs);
-    yvec    = rlvec(geo.south,geo.north,bs);
+    %     bs  = DD.map.out.binSize;
+    %%
+    if round(geo.east - geo.west)==360
+        xvec    = wrapTo360(1:1:360);
+    else
+        xvec    = wrapTo360(round(geo.west):1:round(geo.east));
+    end
+    yvec    = round(geo.south):1:round(geo.north);
     %%
     [map.lon,map.lat] = meshgrid(xvec,yvec);
 end
@@ -87,6 +90,17 @@ function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName,threads)
     lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
     lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
     %% find index in output geometry   
+           
+%   lonidx = round(lon) - meanMaps.lon(1)+1;
+%   lonidx(lonidx > meanMaps.lon(end))=meanMaps.lon(1);
+%   lonidx(lonidx < 1) = lonidx(lonidx < 1) + meanMaps.lon(end); 
+%   
+%   latidx = round(lat) - meanMaps.lat(1)+1;
+%   
+%   idxlin = drop_2d_to_1d(latidx,lonidx,Y);
+  
+  
+    
     lalo = lon + 1i*lat;
     Mlalo = reshape(meanMaps.lon + 1i*meanMaps.lat,[],1);    
     idxlin = nan(size(lalo));  
@@ -116,7 +130,9 @@ function meanMaps = buildMeanMaps(meanMaps,FN,txtFileName,threads)
     scale = fscanf(fopen(txtFileName.scale, 'r'), '%e ');
     %% sum over parameters for each grid cell
     % TODO make faster
+    
     for kk = 1:X*Y
+    fprintf('%2.1f%%\n',round(1000*kk/X/Y)/10)
         flag = (idxlin == kk);
         meanMaps.count(kk) = meanMaps.count(kk) + sum(flag);
         meanMaps.u(kk) = meanMaps.u(kk) + sum(u(flag));
