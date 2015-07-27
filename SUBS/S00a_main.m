@@ -1,20 +1,32 @@
 % sub to ../S00a_prep_raw_data
-function S00a_main(DD,window,cc)
-    parfor_progress;
-    %% get file name
-    file.in    = DD.checks.passed(cc).filenames;
-    timestring = DD.time.timesteps.s(cc,:);
-    file.out   = NSWE2nums(DD.path.cuts.name,DD.pattern.fname,DD.map.in,timestring);
-    %% cut data
-    try
-        CUT  = CutMap(DD,file.in,window);
-    catch readerr
-        warning('cant read %s! skipping!',file.in);
-        disp(readerr.message);
-        return
+function S00a_main(DD,window)
+    lims = thread_distro(DD.threads.num,DD.checks.passedTotal);
+    T = disp_progress('init','preparing raw data');
+    %%
+    spmd(DD.threads.num)
+        spmdBlock(lims,T,DD,window);
     end
-    %% write data
-    WriteFileOut(file.out,CUT);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function spmdBlock(lims,T,DD,window)
+    for cc = lims(labindex,1):lims(labindex,2)
+        T = disp_progress('disp',T,diff(lims(labindex,:)),100);
+        
+        %% get file name
+        file.in    = DD.checks.passed(cc).filenames;
+        timestring = DD.time.timesteps.s(cc,:);
+        file.out   = NSWE2nums(DD.path.cuts.name,DD.pattern.fname,DD.map.in,timestring);
+        %% cut data
+        try
+            CUT  = CutMap(DD,file.in,window);
+        catch readerr
+            warning('cant read %s! skipping!',file.in);
+            disp(readerr.message);
+            return
+        end
+        %% write data
+        WriteFileOut(file.out,CUT);
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [CUT] = CutMap(DD,file,window)
