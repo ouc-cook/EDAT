@@ -2,9 +2,9 @@ function meanMap = P02_main(DD,window)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
     writeToTxtFiles(txtFileName,FN,tracks);
-    %%
+    %
     meanMap =  initMeanMaps(window);
-    %%
+    %
     meanMap = buildMeanMaps(meanMap,txtFileName,DD.threads.num);
     %%
     meanMap.birthDeath = buildBirthDeathMaps(tracks);
@@ -12,6 +12,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function BD = buildBirthDeathMaps(tracks)
     N = numel(tracks);
+    lastIdx=@(x) x(end);
+    getAge=@(x) x.age;
     BD.birth.lat = nan(N,1);
     BD.birth.lon = nan(N,1);
     BD.death.lat = nan(N,1);
@@ -22,7 +24,9 @@ function BD = buildBirthDeathMaps(tracks)
         BD.birth.lon(tt) = bd.birth.lon;
         BD.death.lat(tt) = bd.death.lat;
         BD.death.lon(tt) = bd.death.lon;
+        BD.age(tt) = getAge(lastIdx(getfieldload(tracks(tt).fullname,'track')));
     end
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % init output map dim
@@ -72,7 +76,7 @@ function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
     tracks = DD.path.tracks.files;
     txtdir = [ DD.path.root 'TXT/' ];
     mkdirp(txtdir);
-    FN = {'lat','lon','u','v','scale'};
+    FN = {'lat','lon','u','v','scale','age'};
     for ii=1:numel(FN); fn = FN{ii};
         txtFileName.(fn) = [ txtdir fn '.txt' ];
     end
@@ -94,6 +98,7 @@ function writeToTxtFiles(txtFileName,FN,tracks)
         fprintf(f.u,  '%1.3e ',track.daily.vel.u);
         fprintf(f.v,  '%1.3e ',track.daily.vel.v);
         fprintf(f.scale,  '%d ',track.daily.scale);
+        fprintf(f.age,  '%d ',track.daily.age);
     end
     %% close files
     for ii=1:numel(FN); fn = FN{ii};
@@ -103,9 +108,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% 
-% 
-% 
+%
+%
+%
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % function buildNetCdfFromTxtFiles(FN,txtFileName)
 %     return
@@ -121,14 +126,14 @@ end
 %     nccreate('bla.nc','lat',...
 %         'Dimensions',{'x',1,'N',N},...
 %         'Format','classic')
-%     
+%
 %     nccreate('bla.nc','lon','Dimensions',{'x',1,'N',N})
 %     nccreate('bla.nc','u','Dimensions',{'x',1,'N',N})
 %     nccreate('bla.nc','v','Dimensions',{'x',1,'N',N})
-%     
+%
 %     ncwrite('bla.nc','lat',lat')
 %     ncwrite('bla.nc','lon',lon')
 %     ncwrite('bla.nc','u',u')
 %     ncwrite('bla.nc','v',v')
-%     
+%
 % end

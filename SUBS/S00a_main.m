@@ -10,7 +10,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function spmdBlock(lims,T,DD,window)
     for cc = lims(labindex,1):lims(labindex,2)
-        T = disp_progress('disp',T,diff(lims(labindex,:)),100);
+        T = disp_progress('disp',T,diff(lims(labindex,:))+1,100);
         
         %% get file name
         file.in    = DD.checks.passed(cc).filenames;

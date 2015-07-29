@@ -9,13 +9,11 @@ function P01_main(DD,tracks,lims)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function operateTrack(trackFile)
-    try
+  
         track = load(trackFile);
         track.analyzed = alterTrack(track.track);
         updateTrack(track,trackFile);
-    catch
-        system(sprintf('rm %s',trackFile));
-    end
+   
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function updateTrack(track,trackFile) %#ok<INUSL>
@@ -33,6 +31,12 @@ function analy = alterTrack(track)
     analy.daily.scale                   = scaleStuff(track,analy);
     %%
     analy.birthdeath                    = birthdeathPlaceStuff(track);
+    %%
+    analy.daily.age                     = ageStuff(track);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function age = ageStuff(track)
+    age = track(1).age:1:track(end).age;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % linear indices of window.mat geometry
