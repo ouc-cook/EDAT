@@ -1,5 +1,5 @@
 %% data preparation
-S00a_prep_raw_data 
+% S00a_prep_raw_data 
 S00b_rossbyStuff
 %%
 S00c_buildMeanSsh 
