@@ -12,25 +12,27 @@ function S03_filterContours
     main(DD,rossby);
     system('rm fopt.mat'); % TODO
 end
+%TODO no need to save pass
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD,rossby)
     files = DD.checks.passed;
-    %%
-    parfor_progress(numel(files));
-    for ff = 1:numel(files)
-        parforBlock(DD,files(ff),rossby)
+    spmd
+        spmdBlock(DD,rossby,files)
     end
-    parfor_progress(0);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function parforBlock(DD,fileff,rossby)
-    parfor_progress;
-    %%
-    [EE,skip] = work_day(DD,fileff,rossby);
-    %%
-    if skip,disp(['skipping ' EE.filename.eddy ]);   return;end
-    %% save
-    save_eddies(EE);
+function spmdBlock(DD,rossby,files)
+    Td = disp_progress('init','filtering contours');
+    lims = thread_distro(DD.threads.num, numel(files));
+    for jj = lims(labindex,1):lims(labindex,2)
+        Td = disp_progress('disp',Td,diff(lims(labindex,:))+1);
+        %%
+        [EE,skip] = work_day(DD,files(jj),rossby);
+        %%
+        if skip,disp(['skipping ' EE.filename.eddy ]);   return;end
+        %% save
+        save_eddies(EE);
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [EE,skip] = work_day(DD,file,rossby)
@@ -122,88 +124,88 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [pass,ee] = run_eddy_checks(pass,ee,rossby,cut,DD,direction)
     window = DD.map.window;
-    
+
     %% pre-nan-check
     pass.rim = CR_RimNan(ee.coor.int, window.dim.y, cut.fields.sshAnom);
     if ~pass.rim, return, end;
-    
+
     %% closed ring check
     [pass.CR_ClosedRing] = CR_ClosedRing(ee);
     if ~pass.CR_ClosedRing, return, end;
-    
+
     %% pre filter 'thin 1dimensional' eddies (performance)
     pass.CR_2deddy = CR_2deddy(ee.coor.int);
     if ~pass.CR_2deddy, return, end;
-    
+
     %% get sub map around eddy
     [zoom,pass.winlim] = cutMaskOperation(ee.coor,DD.parameters.zoomIncreaseFac,window,cut.fields);
     if ~pass.winlim, return, end;
-    
+
     %% check for nans within eddy
     [pass.CR_Nan] = CR_Nan(zoom);
     if ~pass.CR_Nan, return, end;
-    
+
     %% check for correct sense
     [pass.CR_sense,ee.sense] = CR_sense(zoom,direction,ee.level);
     if ~pass.CR_sense, return, end;
-    
+
     %% calc contour circumference in [SI]
     [ee.circum.si,ee.fourierCont] = eddyCircumference(zoom);
-    
+
     %% calculate area with respect to contour
     [ee.area,pass.Area] = getArea(ee,DD.thresh.maxRadiusOverRossbyL,DD.thresh.minRossbyRadius,rossby);
     if ~pass.Area, return, end;
-    
+
     %% filter eddies not circle-like enough
     [pass.CR_Shape,ee.iq] = CR_Shape(ee,DD.thresh.shape.iq);
     if ~pass.CR_Shape, return, end;
-    
+
     %% get peak position and amplitude w.r.t contour
     [pass.CR_AmpPeak,ee.peak,zoom.ssh_BasePos] = CR_AmpPeak(ee,zoom,DD.thresh.amp);
     if ~pass.CR_AmpPeak, return, end;
-    
+
     %% get profiles
     [ee.profiles] = eddyProfiles(ee,zoom,DD.parameters.fourierOrder);
     %     if ~pass.CR_radius, return, end; % TODO
-    
+
     %% success! append more stuff
     ee = appendFurtherParameters(ee,zoom,cut,DD,rossby.c);
-    
+
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function  [ee,zoom] = appendFurtherParameters(ee,zoom,cut,DD,rossbyC)
-    
+
     %% get radius according to max UV ie min vort
     [ee.radius] = eddyRadiusFromUV(ee);
-    
+
     %% get ideal ellipse contour
     %     zoom.mask.ellipse = eddyEllipse(ee,zoom.mask);
     zoom.mask.ellipse = eddyEllipse(ee);
-    
+
     %% get effective amplitude relative to ellipse;
     ee.peak.amp.to_ellipse = eddyAmp2Ellipse(ee.peak.z,zoom.fields.sshAnom,zoom.mask.ellipse);
-    
+
     %% append mask to ee in cut coor
     [ee.mask] = sparse(eddyPackMask(zoom.mask.filled,zoom.limits,cut.dim));
-    
+
     %% get center of 'volume'
     [ee.CoV] = CenterOfVolume(zoom.ssh_BasePos,zoom.limits,cut.dim.y);
-    
+
     %% get area centroid
     [ee.CoA] = CenterOfVolume(double(logical(zoom.ssh_BasePos)),zoom.limits,cut.dim.y);
-    
+
     %% get trackref
     ee.trackref = getTrackRef(ee,DD.parameters.trackingRef);
-    
+
     %% get coordinates
     ee.geo = geocoor(zoom, ee.trackref);
-    
+
     %% append 'age'
     ee.age = 0;
-    
+
     %% append projected location
     [ee.projLocsMask] = ProjectedLocations(rossbyC,cut,DD,ee.trackref);
-    
+
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [zoom,pass] = cutMaskOperation(coor,enlargeFac,window,cutFields)
@@ -279,8 +281,9 @@ function [pass,IQ] = CR_Shape(ee,thresh)
     if IQ >= thresh, pass = true; else pass = false; end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pre filter elongated eddies for performance
 function [pass] = CR_2deddy(coor)
-    if (max(coor.x) - min(coor.x)<2) || (max(coor.y) - min(coor.y)<2)
+    if (max(coor.x)-min(coor.x) <3) || (max(coor.y)-min(coor.y) <3)
         pass = false;
     else
         pass = true;
@@ -364,7 +367,7 @@ function [mask,trackref] = ProjectedLocations(rossbyU,cut,DD,trackref)
     maskLogical = sparse(imfill(maskLogical,double([yi.center xi.center]),4));
     %% flag respective overlap too
     if strcmp(DD.map.window.type,'globe')
-        maskLogical =flagOverlap(maskLogical, DD.map.window.dim.x );
+        maskLogical =flagOverlap(maskLogical, DD.map.window );
     end
     %% output
     mask.lin = find(maskLogical);
@@ -387,7 +390,7 @@ end
 % files after system crashes
 function save_eddies(EE)
     [pathstr, ~, ~] = fileparts(EE.filename.eddy);
-    tempn = sprintf('%s%s.mat',pathstr,tempname);
+    tempn = sprintf('%stemp_lab%02d.mat',pathstr,labindex);
     save(tempn,'-v7','-struct','EE'); % saving takes long time..
     system(['mv ' tempn ' ' EE.filename.eddy]);
 end
@@ -584,9 +587,9 @@ function mask = eddyCut_mask(zoom)
     %% inside
     querypoints = [queryX,queryY];
     node = struct2array(zoom.coor.exact);
-   
+
     insideLin = queryLin(inpoly(querypoints,node)); % MAIN BOTTLENECK!!!!!
-  
+
     mask.inside = dummymask;
     mask.inside(insideLin) = true;
     %% on rim
