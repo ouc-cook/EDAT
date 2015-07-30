@@ -12,25 +12,27 @@ function S03_filterContours
     main(DD,rossby);
     system('rm fopt.mat'); % TODO
 end
+%TODO no need to save pass
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(DD,rossby)
     files = DD.checks.passed;
-    %%
-    parfor_progress(numel(files));
-    parfor ff = 1:numel(files)
-        parforBlock(DD,files(ff),rossby)
+    spmd
+        spmdBlock(DD,rossby,files)
     end
-    parfor_progress(0);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function parforBlock(DD,fileff,rossby)
-    parfor_progress;
-    %%
-    [EE,skip] = work_day(DD,fileff,rossby);
-    %%
-    if skip,disp(['skipping ' EE.filename.eddy ]);   return;end
-    %% save
-    save_eddies(EE);
+function spmdBlock(DD,rossby,files)   
+    Td = disp_progress('init','filtering contours');
+    lims = thread_distro(DD.threads.num, numel(files));
+    for jj = lims(labindex,1):lims(labindex,2)
+        Td = disp_progress('disp',Td,diff(lims(labindex,:))+1);
+        %%
+        [EE,skip] = work_day(DD,files(jj),rossby);
+        %%
+        if skip,disp(['skipping ' EE.filename.eddy ]);   return;end
+        %% save
+        save_eddies(EE);
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [EE,skip] = work_day(DD,file,rossby)
@@ -279,8 +281,9 @@ function [pass,IQ] = CR_Shape(ee,thresh)
     if IQ >= thresh, pass = true; else pass = false; end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% pre filter elongated eddies for performance
 function [pass] = CR_2deddy(coor)
-    if (max(coor.x) - min(coor.x)<2) || (max(coor.y) - min(coor.y)<2)
+    if (max(coor.x)-min(coor.x) <3) || (max(coor.y)-min(coor.y) <3)
         pass = false;
     else
         pass = true;
@@ -364,7 +367,7 @@ function [mask,trackref] = ProjectedLocations(rossbyU,cut,DD,trackref)
     maskLogical = sparse(imfill(maskLogical,double([yi.center xi.center]),4));
     %% flag respective overlap too
     if strcmp(DD.map.window.type,'globe')
-        maskLogical =flagOverlap(maskLogical, DD.map.window.dim.x );
+        maskLogical =flagOverlap(maskLogical, DD.map.window );
     end
     %% output
     mask.lin = find(maskLogical);
@@ -387,7 +390,7 @@ end
 % files after system crashes
 function save_eddies(EE)
     [pathstr, ~, ~] = fileparts(EE.filename.eddy);
-    tempn = sprintf('%s%s.mat',pathstr,tempname);
+    tempn = sprintf('%stemp_lab%02d.mat',pathstr,labindex);
     save(tempn,'-v7','-struct','EE'); % saving takes long time..
     system(['mv ' tempn ' ' EE.filename.eddy]);
 end
