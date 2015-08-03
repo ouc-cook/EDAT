@@ -146,8 +146,7 @@ function [pass,ee] = run_eddy_checks(pass,ee,rossby,cut,DD,direction)
     if ~pass.CR_AmpPeak, return, end;
     
     %% get profiles
-    [ee.profiles] = eddyProfiles(ee,zoom,DD.parameters.fourierOrder);
-    %     if ~pass.CR_radius, return, end; % TODO
+    [ee.profiles] = eddyProfiles(ee,zoom,DD.parameters.fourierOrder);   
     
     %% success! append more stuff
     ee = appendFurtherParameters(ee,zoom,cut,DD,rossby.c);
@@ -160,7 +159,6 @@ function  [ee,zoom] = appendFurtherParameters(ee,zoom,cut,DD,rossbyC)
     [ee.radius] = eddyRadiusFromUV(ee);
     
     %% get ideal ellipse contour
-    %     zoom.mask.ellipse = eddyEllipse(ee,zoom.mask);
     zoom.mask.ellipse = eddyEllipse(ee);
     
     %% get effective amplitude relative to ellipse;

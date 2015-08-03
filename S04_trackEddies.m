@@ -7,7 +7,8 @@ if ~isempty(DD.path.tracks.files) && DD.overwrite
     warning('rm''ing old tracks...'); sleep(5)    ;
     system(['rm -r ' DD.path.tracks.name '*.mat']);
 end
-%% main
+%%
 init_threads(2);
+%% main
 S04_main(DD);
 
