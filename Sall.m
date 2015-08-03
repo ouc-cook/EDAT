@@ -1,16 +1,16 @@
 %% data preparation
-S00a_prep_raw_data 
-S00b_rossbyStuff
-%%
-S00c_buildMeanSsh 
-S00d_buildSshAnomaly 
-%% main steps
-S01_calc_fields
-S02_contours
-S03_filterContours
-S04_trackEddies
+% S00a_prep_raw_data 
+% S00b_rossbyStuff
+% %%
+% S00c_buildMeanSsh 
+% S00d_buildSshAnomaly 
+% %% main steps
+% S01_calc_fields
+% S02_contours
+% S03_filterContours
+% S04_trackEddies
 %% post process
 P01_analyzeTracks
 P02_analyzedTracks2maps
 %% plotting
-P03_plotting
+% P03_plotting
