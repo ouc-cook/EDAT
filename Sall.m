@@ -47,7 +47,7 @@
 %           dx: [173x170 double]
 %
 %
-% (See window3.m for details.)
+% (See constructGeoFile.m for details.)
 %
 % ------------------------------------
 %

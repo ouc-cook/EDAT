@@ -5,7 +5,7 @@ function [TS]=S00b_rossbyStuff_setUp(DD)
     %% get window according to user input
     TS.map = DD.map.in;
     TS.map.keys = TS.keys;
-    [TS.window,~] = GetWindow3(TS.salt{1},TS.map);
+    [TS.window,~] = getWindow(TS.salt{1},TS.map);
     %% distro X lims to chunks
    TS.lims.chunks = limsdata(TS.numChunks, TS.window);
     %% distro chunks to threads
@@ -18,12 +18,12 @@ function lims=limsdata(splits,window)
     %% distro X lims to chunks
     lims = thread_distro(splits,X) + window.limits.west-1;
     %% in case window crosses zonal bndry
-    beyondX = lims>window.fullsize.x;
+    beyondX = lims > window.fullsize.x;
     lims(beyondX) = lims(beyondX) - window.fullsize.x;
     %% in case one chunk crosses zonal bndry
     td=lims(:,2)-lims(:,1) < 1; % find chunk
-    lims(td,1)=1; % let it start at 1
-    lims(find(td)-1,2)=window.fullsize.x; % let the one before finish at end(X)
+    lims(td,1) = 1; % let it start at 1
+    lims(find(td)-1,2) = window.fullsize.x; % let the one before finish at end(X)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % somewhat redundant since we only use one temp/salt file each..

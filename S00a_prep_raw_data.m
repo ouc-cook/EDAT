@@ -6,7 +6,7 @@
 %
 % the function
 % -first creates the geometric information needed to transform
-% input SSH to desired output geometry (see window3.m)
+% input SSH to desired output geometry (see constructGeoFile.m)
 % -and then saves one output .mat SSH file per time-step to
 % ../dataXXX/CUTS/
 %

@@ -1,4 +1,4 @@
-function [win,lonlat]=GetWindow3(file,mapIn)
+function [win,lonlat]=getWindow(file,mapIn)
     %% get lon and lat
     keyPattern.lat = mapIn.keys.lat;
     keyPattern.lon = mapIn.keys.lon;
@@ -9,12 +9,11 @@ function [win,lonlat]=GetWindow3(file,mapIn)
     [win.fullsize.y, win.fullsize.x] = size(lonlat.lon);
     %% find rectangle enclosing all applicable data
     [win] = FindRectangle(win,lonlat.lon,triplemap);
-    %% append 1/10 of map for tracking if conti in x
+    %% append 1/10 of map for tracking if map is continuous in x
     [win] = ZonalProblem(win);
     %%
     [win.geo] = getGeoLims(win,lonlat);
 end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [geo]=getGeoLims(w,lonlat)
     rs=@(x) reshape(x,1,[]);
@@ -23,7 +22,6 @@ function [geo]=getGeoLims(w,lonlat)
     geo.west  = min(rs(lonlat.lon(w.flag)));
     geo.east  = max(rs(lonlat.lon(w.flag)));
 end
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [w]=ZonalProblem(w)
     [w.iy,w.ix] = raise_1d_to_2d(w.fullsize.y,w.idx);

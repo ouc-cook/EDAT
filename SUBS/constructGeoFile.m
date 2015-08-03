@@ -2,7 +2,7 @@
 function window = constructGeoFile(DD)
     %% get sample window
     sampleFile = DD.path.raw.files(1).fullname;
-    [window]   = GetWindow3(sampleFile,DD.map.in);
+    [window]   = getWindow(sampleFile,DD.map.in);
     %% read geo info
     keys.lat = DD.map.in.keys.lat;
     keys.lon = DD.map.in.keys.lon;
