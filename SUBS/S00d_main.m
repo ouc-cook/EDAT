@@ -4,12 +4,12 @@ function S00d_main(files,sshMean)
     parfor_progress(N);
     parfor ff = 1:N
         parfor_progress;
-        loopOverFiles(ff,files,sshMean)
+        treatFile(ff,files,sshMean)
     end
     parfor_progress(0);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function loopOverFiles(ff,files,sshMean)
+function treatFile(ff,files,sshMean)
     currentFile = files(ff).filenames;
     %% load
     cut = load(currentFile);

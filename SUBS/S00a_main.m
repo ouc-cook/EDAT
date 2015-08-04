@@ -10,8 +10,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function spmdBlock(lims,T,DD,window)
     for cc = lims(labindex,1):lims(labindex,2)
-        T = disp_progress('disp',T,diff(lims(labindex,:)),100);
-        
+        T = disp_progress('disp',T,diff(lims(labindex,:)),100);        
         %% get file name
         file.in    = DD.checks.passed(cc).filenames;
         timestring = DD.time.timesteps.s(cc,:);
@@ -39,13 +38,13 @@ function [CUT] = CutMap(DD,file,window)
     CUT.fields.ssh = nanLand(CUT.fields.ssh,DD.parameters.ssh_unitFactor);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function out=nanLand(in,fac)
+function out = nanLand(in,fac)
     %% nan and SI
-    out=in / fac;
+    out = in / fac;
     out(out==0)=nan;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function WriteFileOut(file,CUT) %#ok<INUSD>
+function WriteFileOut(file,CUT)  %#ok<INUSD>
     tempfile = [fileparts(file) tempname];
     save(tempfile,'-struct','CUT');
     system(sprintf('mv %s.mat %s',tempfile,file)) ;

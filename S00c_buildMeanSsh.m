@@ -17,7 +17,7 @@ for ff = 1:numel(files) % TODO make parallel
     waitbar(perc/100,h,sprintf('%d%% along...',perc))
     %% load
     ssh = prmt(getfield(getfieldload(files(ff).filenames,'fields'),'ssh'));
-    %% mean ssh
+    %% sum ssh
     sshSum = nansum([sshSum; ssh],1);
 end
 close(h)
