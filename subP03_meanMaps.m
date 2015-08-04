@@ -1,7 +1,7 @@
 function fig=subP03_meanMaps(DD,window,meanMaps)
     %%
     la = meanMaps.lat;
-    lo = meanMaps.lon;
+    lo = meanMaps.lon;   
     %%
     fig.u = figure;
     mapU(meanMaps.u,lo,la);
