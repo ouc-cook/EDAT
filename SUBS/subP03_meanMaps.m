@@ -2,6 +2,9 @@ function fig=subP03_meanMaps(DD,window,meanMaps)
     %%
     la = meanMaps.lat;
     lo = meanMaps.lon;   
+   %%
+    fig.v = figure;
+    mapV(meanMaps.v,lo,la);
     %%
     fig.u = figure;
     mapU(meanMaps.u,lo,la);
@@ -17,6 +20,13 @@ function mapScale(scale,lo,la)
     colorbar
     shading flat
     caxis([20 200])    
+end
+
+function mapV(v,lo,la)
+    pcolor(lo,la,v);set(gcf,'windowstyle','docked')
+    shading flat
+    caxis([-.01 .01])
+    colorbar
 end
 
 function mapU(u,lo,la)

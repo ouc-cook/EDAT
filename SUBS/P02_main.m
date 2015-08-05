@@ -48,6 +48,9 @@ function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads)
     lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
     lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
     
+%     sum(lat>35 & lat<40 & lon>65 & lon <75)
+    
+    
     %% find index in output geometry
     idxlin = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
     
@@ -79,8 +82,7 @@ function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function writeToTxtFiles(txtFileName,FN,tracks)
-    %% open files
-    
+    %% open files    
     for ii=1:numel(FN); fn = FN{ii};
         system(sprintf('rm -f %s',txtFileName.(fn)));
         f.(fn) = fopen(txtFileName.(fn), 'w');
