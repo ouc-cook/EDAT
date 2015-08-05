@@ -1,4 +1,4 @@
-function meanMap = P02_main(DD,window)
+function P02_main(DD,window)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
@@ -8,6 +8,8 @@ function meanMap = P02_main(DD,window)
     meanMap = buildMeanMaps(meanMap,txtFileName,DD.threads.num);
     %%
     meanMap.birthDeath = buildBirthDeathMaps(tracks);
+    %%
+    save([DD.path.root,'meanMaps.mat'],'meanMap');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function BD = buildBirthDeathMaps(tracks)
