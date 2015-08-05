@@ -11,9 +11,9 @@ end
 function operateTrack(trackFile)
     try
         track = load(trackFile);
-        if isfield(track,'analyzed')
-            return
-        end
+%         if isfield(track,'analyzed')
+%             return
+%         end
         track.analyzed = alterTrack(track.track);
         updateTrack(track,trackFile);
     catch
