@@ -59,11 +59,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[geo] = geoStuff(analy)
     geo.lat = spline(analy.time,analy.dist.lat,analy.daily.time');
-    if diff(abs(analy.dist.lon))>300
-        figure(4) % TODO
-        hold on
+    if any(abs(diff(analy.dist.lon)))>300       
         geo.lon = wrapTo360(spline(analy.time,wrapTo180(analy.dist.lon),analy.daily.time'));
-        plot(geo.lon)
     else
         geo.lon = spline(analy.time,analy.dist.lon,analy.daily.time');
     end
