@@ -170,6 +170,7 @@ function PATH = findfiles(DD)
     PATH.eddies.name = [PATH.root,'EDDYS/'];
     PATH.tracks.name = [PATH.root,'TRACKS/'];
     PATH.Rossby.name = [PATH.root,'ROSSBY/'];
+    PATH.analyzed.name = [PATH.root,'ANALYZED/'];
     PATH.Rossby.Nfile = [PATH.Rossby.name,'N.cdf']; % TODO ?
     
     %% create nonexistant dirs
@@ -184,6 +185,7 @@ function PATH = findfiles(DD)
     PATH.conts.files = dir2([PATH.conts.name,'*.mat']);
     PATH.eddies.files = dir2([PATH.eddies.name,'*.mat']);
     PATH.tracks.files = dir2([PATH.tracks.name,'*.mat']);
+    PATH.analyzed.files = dir2([PATH.analyzed.name,'*.mat']);
     PATH.Rossby.files = dir2([PATH.Rossby.name,'*.mat']);
     %%
     PATH.windowFile = [PATH.root 'window.mat'];
@@ -196,7 +198,7 @@ function mkDirs(path)
     mkdirp(path.root);
     mkdirp(path.code);
     mkdirp(path.codesubs);
-    subdirs = {'cuts','conts','eddies','tracks','Rossby'};
+    subdirs = {'cuts','conts','eddies','tracks','Rossby','analyzed'};
     for ss=1:numel(subdirs)
         mkdirp(path.(subdirs{ss}).name);
         mkdirp([path.(subdirs{ss}).name,'tmp']);

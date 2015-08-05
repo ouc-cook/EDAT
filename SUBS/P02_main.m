@@ -5,26 +5,9 @@ function P02_main(DD,window)
     %%
     meanMap =  initMeanMaps(window);
     %%
-    meanMap = buildMeanMaps(meanMap,txtFileName,DD.threads.num);
-    %%
-    meanMap.birthDeath = buildBirthDeathMaps(tracks);
+    meanMap = buildMeanMaps(meanMap,txtFileName,DD.threads.num); %#ok<NASGU>
     %%
     save([DD.path.root,'meanMaps.mat'],'meanMap');
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function BD = buildBirthDeathMaps(tracks)
-    N = numel(tracks);
-    BD.birth.lat = nan(N,1);
-    BD.birth.lon = nan(N,1);
-    BD.death.lat = nan(N,1);
-    BD.death.lon = nan(N,1);
-    for tt = 1:numel(tracks)
-        bd = getfield(getfieldload(tracks(tt).fullname,'analyzed'),'birthdeath');
-        BD.birth.lat(tt) = bd.birth.lat;
-        BD.birth.lon(tt) = bd.birth.lon;
-        BD.death.lat(tt) = bd.death.lat;
-        BD.death.lon(tt) = bd.death.lon;
-    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % init output map dim
@@ -49,10 +32,6 @@ function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads)
     %% read lat lon vectors
     lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
     lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
-
-%     sum(lat>35 & lat<40 & lon>65 & lon <75)
-
-
     %% find index in output geometry
     idxlin = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
 
@@ -74,10 +53,10 @@ function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
-    tracks = DD.path.tracks.files;
+    tracks = DD.path.analyzed.files;
     txtdir = [ DD.path.root 'TXT/' ];
     mkdirp(txtdir);
-    FN = {'lat','lon','u','v','scale'};
+    FN = {'lat','lon','u','v','scale','amp'};
     for ii=1:numel(FN); fn = FN{ii};
         txtFileName.(fn) = [ txtdir fn '.txt' ];
     end
@@ -96,12 +75,13 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
         %% write parameters to respective files
         for tt=lims(labindex,1):lims(labindex,2)
             T = disp_progress('show',T,diff(lims(labindex,:))+1,100);
-            track = getfieldload(tracks(tt).fullname,'analyzed');
+            track = load(tracks(tt).fullname);
             fprintf(fid.lat,'%3.3f ',track.daily.geo.lat );
             fprintf(fid.lon,'%3.3f ',track.daily.geo.lon );
             fprintf(fid.u,  '%1.3e ',track.daily.vel.u);
             fprintf(fid.v,  '%1.3e ',track.daily.vel.v);
             fprintf(fid.scale, '%d ',track.daily.scale);
+            fprintf(fid.amp,'%3.3f ',track.amp*100);
         end
         %% close files
         for ii=1:numel(FN); fn = FN{ii};

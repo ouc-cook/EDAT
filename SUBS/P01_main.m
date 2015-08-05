@@ -1,31 +1,34 @@
 function P01_main(DD,tracks,lims)
     T = disp_progress('init','altering tracks');
-        spmd(DD.threads.num)
-    for ff = lims(labindex,1):lims(labindex,2)
-        T = disp_progress('draw',T,diff(lims(labindex,:))+1);
-        operateTrack(tracks(ff).fullname);
-    end
+    spmd(DD.threads.num)
+        for ff = lims(labindex,1):lims(labindex,2)
+            T = disp_progress('draw',T,diff(lims(labindex,:))+1);
+            operateTrack(tracks(ff).fullname);
         end
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function operateTrack(trackFile)
     try
         track = load(trackFile);
-%         if isfield(track,'analyzed')
-%             return
-%         end
-        track.analyzed = alterTrack(track.track);
-        updateTrack(track,trackFile);
     catch
         system(sprintf('mv %s %sCORRUPT',trackFile,trackFile))
+        return
+    end
+    analyzed = alterTrack(track.track,trackFile);
+    updateTrack(analyzed,trackFile);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function updateTrack(analyzed,trackFile) %#ok<INUSL>
+    anaFile =  strrep(strrep(trackFile,'TRACKS','ANALYZED'),'TRACK','ANA');
+    if exist(anaFile,'file')
+        save(anaFile,'-struct','analyzed','-append');
+    else
+        save(anaFile,'-struct','analyzed');
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function updateTrack(track,trackFile) %#ok<INUSL>
-    save(trackFile,'-struct','track');
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function analy = alterTrack(track)
+function analy = alterTrack(track,trackFile)
     %%
     [analy.dist,analy.time]             = distanceStuff(track);
     %%
@@ -36,6 +39,14 @@ function analy = alterTrack(track)
     analy.daily.scale                   = scaleStuff(track,analy);
     %%
     analy.birthdeath                    = birthdeathPlaceStuff(track);
+    %%
+    analy.origFile                      = trackFile;
+    %%
+    analy.amp                           = amplitudeStuff(track);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function amp = amplitudeStuff(track)
+    amp = extractdeepfield(track,'peak.amp.to_ellipse');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % linear indices of window.mat geometry
