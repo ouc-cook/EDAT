@@ -1,4 +1,3 @@
-
 DD     = initialise;
 window = getfieldload(DD.path.windowFile,'window');
 %%

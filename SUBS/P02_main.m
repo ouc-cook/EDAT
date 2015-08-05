@@ -1,7 +1,7 @@
 function meanMap = P02_main(DD,window)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
-    writeToTxtFiles(txtFileName,FN,tracks);
+    writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
     meanMap =  initMeanMaps(window);
     %%
@@ -78,27 +78,38 @@ function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function writeToTxtFiles(txtFileName,FN,tracks)
-    %% open files
-    
-    for ii=1:numel(FN); fn = FN{ii};
-        system(sprintf('rm -f %s',txtFileName.(fn)));
-        f.(fn) = fopen(txtFileName.(fn), 'w');
-    end
-    %% write parameters to respective files
-    for tt=1:1:numel(tracks)
-        fprintf('%d%%\n',round(100*tt/numel(tracks)));
-        track = getfieldload(tracks(tt).fullname,'analyzed');
-        fprintf(f.lat,'%3.3f ',track.daily.geo.lat );
-        fprintf(f.lon,'%3.3f ',track.daily.geo.lon );
-        fprintf(f.u,  '%1.3e ',track.daily.vel.u);
-        fprintf(f.v,  '%1.3e ',track.daily.vel.v);
-        fprintf(f.scale,  '%d ',track.daily.scale);
-    end
-    %% close files
-    for ii=1:numel(FN); fn = FN{ii};
-        fclose(f.(fn));
-    end
+function writeToTxtFiles(txtFileName,FN,tracks,threads)
+    %% open files    
+    lims = thread_distro(threads,numel(tracks)); 
+    T = disp_progress('init','creating TXT/*.txt files');
+    spmd(threads)
+        for ii=1:numel(FN); fn = FN{ii};
+            myFname = strrep(txtFileName.(fn),'.txt',sprintf('%02d.txt',labindex));
+            system(sprintf('rm -f %s',myFname));
+            fid.(fn) = fopen(myFname, 'w');
+        end        
+        %% write parameters to respective files
+        for tt=lims(labindex,1):lims(labindex,2)
+            T = disp_progress('show',T,diff(lims(labindex,:))+1,100);
+            track = getfieldload(tracks(tt).fullname,'analyzed');
+            fprintf(fid.lat,'%3.3f ',track.daily.geo.lat );
+            fprintf(fid.lon,'%3.3f ',track.daily.geo.lon );
+            fprintf(fid.u,  '%1.3e ',track.daily.vel.u);
+            fprintf(fid.v,  '%1.3e ',track.daily.vel.v);
+            fprintf(fid.scale, '%d ',track.daily.scale);
+        end
+        %% close files
+        for ii=1:numel(FN); fn = FN{ii};
+            fclose(fid.(fn));
+        end
+    end    
+    %% cat workers' files
+      for ii=1:numel(FN); fn = FN{ii};
+            allFname = strrep(txtFileName.(fn),'.txt','??.txt');
+            outFname = txtFileName.(fn);
+            system(sprintf('cat %s > %s',allFname,outFname));
+            system(sprintf('rm %s',allFname));
+      end     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
