@@ -1,20 +1,23 @@
 function P01_main(DD,tracks,lims)
     T = disp_progress('init','altering tracks');
-    spmd(DD.threads.num)
-        for ff = lims(labindex,1):lims(labindex,2)
-            T = disp_progress('draw',T,diff(lims(labindex,:))+1);
-            operateTrack(tracks(ff).fullname);
-        end
+        spmd(DD.threads.num)
+    for ff = lims(labindex,1):lims(labindex,2)
+        T = disp_progress('draw',T,diff(lims(labindex,:))+1);
+        operateTrack(tracks(ff).fullname);
     end
+        end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function operateTrack(trackFile)
     try
         track = load(trackFile);
+        if isfield(track,'analyzed')
+            return
+        end
         track.analyzed = alterTrack(track.track);
         updateTrack(track,trackFile);
     catch
-        system(sprintf('rm %s',trackFile));
+        system(sprintf('mv %s %sCORRUPT',trackFile,trackFile))
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -45,8 +48,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[geo] = geoStuff(analy)
     geo.lat = spline(analy.time,analy.dist.lat,analy.daily.time');
-    geo.lon = spline(analy.time,analy.dist.lon,analy.daily.time');
-    
+    if diff(abs(analy.dist.lon))>300
+        figure(4) % TODO
+        hold on
+        geo.lon = wrapTo360(spline(analy.time,wrapTo180(analy.dist.lon),analy.daily.time'));
+        plot(geo.lon)
+    else
+        geo.lon = spline(analy.time,analy.dist.lon,analy.daily.time');
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[scale] = scaleStuff(track,analy)
@@ -66,7 +75,7 @@ function [dist,time] = distanceStuff(track)
     dist.lat = extractdeepfield(track,'geo.lat');
     dist.lon = extractdeepfield(track,'geo.lon');
     %% get distance-from-birth components
-    dist.y = deg2km(zeroShift(dist.lat)                  );
+    dist.y = deg2km(zeroShift(dist.lat)                             );
     dist.x = deg2km(zeroShift(wrapTo360(dist.lon)).* cosd(dist.lat) );
     time = extractdeepfield(track,'daynum');
     %% build spline cfit to distance vectors

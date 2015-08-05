@@ -43,29 +43,32 @@ end
 function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads)
     %% init
     [Y,X] = size(meanMaps.lat);
-    
+
     %% read lat lon vectors
     lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
     lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
-    
+
+%     sum(lat>35 & lat<40 & lon>65 & lon <75)
+
+
     %% find index in output geometry
     idxlin = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
-    
+
     %% read parameters
     u     = fscanf(fopen(txtFileName.u, 'r'),     '%e ');
     v     = fscanf(fopen(txtFileName.v, 'r'),     '%e ');
     scale = fscanf(fopen(txtFileName.scale, 'r'), '%e ');
-    
+
     %% sum over parameters for each grid cell
     meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
     meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
     meanMaps.scale = meanMapOverIndexedBins(scale,idxlin,Y,X,threads);
-    
+
     %% calc angle
     uv               = meanMaps.u + 1i * meanMaps.v;
     meanMaps.absUV   = abs(uv) ;
     meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
-    
+
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
@@ -79,15 +82,15 @@ function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function writeToTxtFiles(txtFileName,FN,tracks,threads)
-    %% open files    
-    lims = thread_distro(threads,numel(tracks)); 
+    %% open files
+    lims = thread_distro(threads,numel(tracks));
     T = disp_progress('init','creating TXT/*.txt files');
     spmd(threads)
         for ii=1:numel(FN); fn = FN{ii};
             myFname = strrep(txtFileName.(fn),'.txt',sprintf('%02d.txt',labindex));
             system(sprintf('rm -f %s',myFname));
             fid.(fn) = fopen(myFname, 'w');
-        end        
+        end
         %% write parameters to respective files
         for tt=lims(labindex,1):lims(labindex,2)
             T = disp_progress('show',T,diff(lims(labindex,:))+1,100);
@@ -102,44 +105,13 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
         for ii=1:numel(FN); fn = FN{ii};
             fclose(fid.(fn));
         end
-    end    
+    end
     %% cat workers' files
       for ii=1:numel(FN); fn = FN{ii};
             allFname = strrep(txtFileName.(fn),'.txt','??.txt');
             outFname = txtFileName.(fn);
             system(sprintf('cat %s > %s',allFname,outFname));
             system(sprintf('rm %s',allFname));
-      end     
+      end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% 
-% 
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function buildNetCdfFromTxtFiles(FN,txtFileName)
-%     return
-%     % TODO
-%     for ii=1:numel(FN); fn = FN{ii};
-%         f.(fn) = fopen(txtFileName.(fn), 'r');
-%     end
-%     lat=fscanf(f.lat,'%f');
-%     lon=fscanf(f.lon,'%f');
-%     u=fscanf(f.u,'%f');
-%     v=fscanf(f.v,'%f');
-%     N=numel(a);
-%     nccreate('bla.nc','lat',...
-%         'Dimensions',{'x',1,'N',N},...
-%         'Format','classic')
-%     
-%     nccreate('bla.nc','lon','Dimensions',{'x',1,'N',N})
-%     nccreate('bla.nc','u','Dimensions',{'x',1,'N',N})
-%     nccreate('bla.nc','v','Dimensions',{'x',1,'N',N})
-%     
-%     ncwrite('bla.nc','lat',lat')
-%     ncwrite('bla.nc','lon',lon')
-%     ncwrite('bla.nc','u',u')
-%     ncwrite('bla.nc','v',v')
-%     
-% end
