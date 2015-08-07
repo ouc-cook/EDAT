@@ -15,7 +15,7 @@ function operateTrack(trackFile)
         system(sprintf('mv %s %sCORRUPT',trackFile,trackFile))
         return
     end
-    analyzed = alterTrack(track.track,trackFile);
+    analyzed = alterTrack(track.track,trackFile);   
     updateTrack(analyzed,trackFile);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -34,7 +34,7 @@ function analy = alterTrack(track,trackFile)
     %%
     [analy.daily.vel,analy.daily.time]  = velocityStuff(analy.dist,analy.time);
     %%
-    analy.daily.geo                     = geoStuff(analy);
+    analy.daily.geo                     = geoStuff(analy);   
     %%
     analy.daily.scale                   = scaleStuff(track,analy);
     %%
@@ -59,7 +59,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[geo] = geoStuff(analy)
     geo.lat = spline(analy.time,analy.dist.lat,analy.daily.time');
-    if any(abs(diff(analy.dist.lon)))>300       
+    if any(abs(diff(analy.dist.lon))>300)
         geo.lon = wrapTo360(spline(analy.time,wrapTo180(analy.dist.lon),analy.daily.time'));
     else
         geo.lon = spline(analy.time,analy.dist.lon,analy.daily.time');

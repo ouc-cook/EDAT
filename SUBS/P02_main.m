@@ -32,6 +32,7 @@ function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads)
     %% read lat lon vectors
     lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
     lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
+  
     %% find index in output geometry
     idxlin = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
 
