@@ -15,7 +15,7 @@ function operateTrack(trackFile)
         system(sprintf('mv %s %sCORRUPT',trackFile,trackFile))
         return
     end
-    analyzed = alterTrack(track.track,trackFile);   
+    analyzed = analyzeTrack(track.track,trackFile);
     updateTrack(analyzed,trackFile);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -28,13 +28,13 @@ function updateTrack(analyzed,trackFile) %#ok<INUSL>
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function analy = alterTrack(track,trackFile)
+function analy = analyzeTrack(track,trackFile)
     %%
     [analy.dist,analy.time]             = distanceStuff(track);
     %%
     [analy.daily.vel,analy.daily.time]  = velocityStuff(analy.dist,analy.time);
     %%
-    analy.daily.geo                     = geoStuff(analy);   
+    analy.daily.geo                     = geoStuff(analy);
     %%
     analy.daily.scale                   = scaleStuff(track,analy);
     %%
@@ -82,9 +82,14 @@ function [dist,time] = distanceStuff(track)
     zeroShift=@(x) x-x(1);
     dist.lat = extractdeepfield(track,'geo.lat');
     dist.lon = extractdeepfield(track,'geo.lon');
+    lo = dist.lon;
     %% get distance-from-birth components
-    dist.y = deg2km(zeroShift(dist.lat)                             );
-    dist.x = deg2km(zeroShift(wrapTo360(dist.lon)).* cosd(dist.lat) );
+    if any(abs(diff(lo))>300)
+        lo = wrapTo180(lo);
+    end
+    dist.x = deg2km(zeroShift(lo)).* cosd(dist.lat);
+    dist.y = deg2km(zeroShift(dist.lat));
+    %% time
     time = extractdeepfield(track,'daynum');
     %% build spline cfit to distance vectors
     dist.fit.y = fit(time',dist.y','smoothingspline');
