@@ -3,4 +3,4 @@ window = getfieldload(DD.path.windowFile,'window');
 %%
 P02_main(DD,window);
 %%
-% TODO buildBirthDeathMaps(tracks)
+subP02_buildBirthDeathMaps(DD,window)

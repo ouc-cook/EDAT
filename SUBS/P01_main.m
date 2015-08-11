@@ -1,3 +1,14 @@
+%  --- Post-processing step 1 ---
+% 
+%  -(I) load track file
+%  -(II) analyze track
+% 	 -(a) build distance-from-birth-place (x,y)-vectors ([km]) at daily resolution, by interpolating the geo coordinates (smoothingspline).
+% 	 -(b) build velocity-vectors by differentiating the vectors from (b).
+% 	 -(c) also interpolate daily lat/lon vectors.
+% 	 -(d) also interpolate daily scale (hori.) vectors.
+% 	 -(e) extract geo-info for birth and death places.
+% 	 -(f) also interpolate daily amplitude vectors.
+%  -(III) save analyzed track to "ANALYZED"
 function P01_main(DD,tracks,lims)
     T = disp_progress('init','altering tracks');
     spmd(DD.threads.num)

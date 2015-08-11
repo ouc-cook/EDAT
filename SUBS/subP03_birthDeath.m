@@ -1,0 +1,59 @@
+function subP03_birthDeath(DD,B,D,lo,la)
+    close all
+    [long,lat]=loadcoast360;
+    
+    
+    %%
+    pcolor(lo,la,log(B.map));shading flat;
+    set(gcf,'windowstyle','docked')
+    CB = colorbar;
+    colormap(jet(100));
+    yt= get(CB,'ytick');
+    set(CB,'ytick',log(round(exp(yt))));
+    set(CB,'yticklabel',round(exp(yt)));
+    hold on
+    plot(long,lat);
+    title(['Births per 1x1deg bin.'])
+    %%
+    tit=[DD.path.root 'mapBinBirths'];
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    %%
+    pcolor(lo,la,log(D.map));shading flat;
+    set(gcf,'windowstyle','docked')
+    CB = colorbar;
+    colormap(jet(100));
+    yt= get(CB,'ytick');
+    set(CB,'ytick',log(round(exp(yt))));
+    set(CB,'yticklabel',round(exp(yt)));
+    hold on
+    plot(long,lat);
+    title(['Deaths per 1x1deg bin.'])
+    %%
+    tit=[DD.path.root 'mapBinDeaths'];
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    
+    %%
+    clf
+    pcolor(lo,la,B.map-D.map);shading flat;
+    set(gcf,'windowstyle','docked')
+    CB = colorbar;
+    
+    caxis([-20 20])
+    colormap(bluewhitered(100,true));
+    %     yt= get(CB,'ytick');
+    %     set(CB,'ytick',log(round(exp(yt))));
+    %     set(CB,'yticklabel',round(exp(yt)));
+    hold on
+    plot(long,lat);
+    title(['(births - deaths) per 1x1deg bin.'])
+    %%
+    tit=[DD.path.root 'mapBinBminusD'];
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    
+end

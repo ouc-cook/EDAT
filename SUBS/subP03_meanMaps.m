@@ -3,11 +3,7 @@ function subP03_meanMaps(DD,window,mM)
     la = mM.lat;
     lo = mM.lon;
     close all
-    load coast
-   long = wrapTo360(long);
-   flag = long>359 | long<1;
-   long(flag)=nan;
-   lat(flag)=nan;
+    [long,lat]=loadcoast360;
     %%
 %     pr=parula(20);
 %     CM = [pr(:,[1 2 3]);flipud(pr)];
@@ -23,6 +19,7 @@ function subP03_meanMaps(DD,window,mM)
     plot(long,lat)
     colormap(bluewhitered(100))
     tit=[DD.path.root 'mapBinV'];
+    %%
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     %%
@@ -44,7 +41,7 @@ function subP03_meanMaps(DD,window,mM)
     
     %%
     
-     figure(3);    
+    figure(3);
     pcolor(lo,la,mM.scale/1000);set(gcf,'windowstyle','docked')
     shading flat
     caxis([0 200])
@@ -53,8 +50,8 @@ function subP03_meanMaps(DD,window,mM)
     title('scale [km]')
     hold on
     plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
-    grid on    
-      plot(long,lat,'-black')
+    grid on
+    plot(long,lat,'-black')
     tit=[DD.path.root 'mapBinScale'];
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
@@ -63,8 +60,10 @@ function subP03_meanMaps(DD,window,mM)
       %%
     figure(4);
     clf
+    lim=.2;
     u= mM.u(:);v= mM.v(:);llo=lo(:);lla=la(:);
-      fl=abs(u)>.1 | abs(v)>.05;
+    
+      fl=abs(u)>lim | abs(v)>.05;
     v(fl)=[];
      llo(fl)=[];
       lla(fl)=[];
@@ -78,9 +77,29 @@ function subP03_meanMaps(DD,window,mM)
       plot(long,lat)
       axis tight
     tit=[DD.path.root 'mapBinQuiv'];
-    xlabel(sprintf('skipping vectors with u>%d cm/s',0.1*100))
+    xlabel(sprintf('skipping vectors with u>%d cm/s',lim*100))
     %%
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    
+       %%
+    figure(5);
+   mM
+    
+    quiver(llo(1:inc:end),lla(1:inc:end),u(1:inc:end),v(1:inc:end),2)
+    title('quiver [cm/s]')
+    hold on
+    plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
+    grid on  
+      plot(long,lat)
+      axis tight
+    tit=[DD.path.root 'mapBinQuiv'];
+    xlabel(sprintf('skipping vectors with u>%d cm/s',lim*100))
+    %%
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    
     
 end

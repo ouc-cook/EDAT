@@ -1,3 +1,8 @@
+%  --- Post-processing step 2 ---
+% 
+%  -(I) prepare .txt files at "TXT"
+%  -(II) cat all values of all tracks into one .txt per parameter.
+%  -(III) build means of parameters over 1x1degree bins.
 function P02_main(DD,window)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
@@ -7,7 +12,7 @@ function P02_main(DD,window)
     %%
     meanMap = buildMeanMaps(meanMap,txtFileName,DD.threads.num); %#ok<NASGU>
     %%
-    save([DD.path.root,'meanMaps.mat'],'meanMap');
+    save([DD.path.root,'meanMaps.mat'],'-struct','meanMap','-append');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % init output map dim
@@ -89,6 +94,7 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
             fclose(fid.(fn));
         end
     end
+    
     %% cat workers' files
       for ii=1:numel(FN); fn = FN{ii};
             allFname = strrep(txtFileName.(fn),'.txt','??.txt');
