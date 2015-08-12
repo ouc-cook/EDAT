@@ -22,7 +22,7 @@ function subP03_makeNetCdf(DD,window,meanMaps)
     ncwrite(ncF,'radius',permute(meanMaps.meanMap.scale,[2 1]));
     ncwrite(ncF,'absU',permute(meanMaps.meanMap.absUV,[2 1]));
     ncwrite(ncF,'angleU',permute(meanMaps.meanMap.angleUV,[2 1]));
-      ncwrite(ncF,'births',permute(meanMaps.birth.map,[2 1]));
+    ncwrite(ncF,'births',permute(meanMaps.birth.map,[2 1]));
     ncwrite(ncF,'deaths',permute(meanMaps.death.map,[2 1]));
     ncwrite(ncF,'birthsMinusDeaths',permute(meanMaps.birth.map-meanMaps.death.map,[2 1]));
     

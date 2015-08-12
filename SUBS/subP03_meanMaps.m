@@ -83,23 +83,7 @@ function subP03_meanMaps(DD,window,mM)
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     
     
-       %%
-    figure(5);
-   mM
-    
-    quiver(llo(1:inc:end),lla(1:inc:end),u(1:inc:end),v(1:inc:end),2)
-    title('quiver [cm/s]')
-    hold on
-    plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
-    grid on  
-      plot(long,lat)
-      axis tight
-    tit=[DD.path.root 'mapBinQuiv'];
-    xlabel(sprintf('skipping vectors with u>%d cm/s',lim*100))
-    %%
-    print(tit,'-dpng')
-    system(sprintf('convert %s.png -trim %s.png',tit,tit))
-    
+   
     
     
 end

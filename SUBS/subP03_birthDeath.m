@@ -38,15 +38,16 @@ function subP03_birthDeath(DD,B,D,lo,la)
     
     %%
     clf
+    lims=[-20 20];
     pcolor(lo,la,B.map-D.map);shading flat;
     set(gcf,'windowstyle','docked')
     CB = colorbar;
     
-    caxis([-20 20])
+    caxis(lims)
     colormap(bluewhitered(100,true));
-    %     yt= get(CB,'ytick');
-    %     set(CB,'ytick',log(round(exp(yt))));
-    %     set(CB,'yticklabel',round(exp(yt)));
+  
+  set(CB,'ytick',lims);
+  set(CB,'yticklabel',{'deaths','births'});
     hold on
     plot(long,lat);
     title(['(births - deaths) per 1x1deg bin.'])
