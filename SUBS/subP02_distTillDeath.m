@@ -3,11 +3,11 @@ function subP02_distTillDeath(DD,window)
     %%
     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
-    distTillD =  initBinMaps(window);
+    distTill =  initBinMaps(window);
     %     %%
-    distTillD = buildBinMaps(distTillD,txtFileName,DD.threads.num); %#ok<NASGU>
+    distTill = buildBinMaps(distTill,txtFileName,DD.threads.num); %#ok<NASGU>
     %     %%
-    save([DD.path.root,'meanMaps.mat'],'-struct','distTillD','-append');     
+    save([DD.path.root,'meanMaps.mat'],'-struct','distTill','-append');
     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,30 +31,29 @@ function [out] = buildBinMaps(binMaps,txtFileName,threads)
     [Y,X] = size(binMaps.lat);
     
     %% read lat lon vectors
-    b.lat = fscanf(fopen(txtFileName.birthLat, 'r'), '%f ');
-    b.lon = wrapTo360(fscanf(fopen(txtFileName.birthLon, 'r'), '%f '));
-    d.lat = fscanf(fopen(txtFileName.deathLat, 'r'), '%f ');
-    d.lon = wrapTo360(fscanf(fopen(txtFileName.deathLon, 'r'), '%f '));
+    dX = fscanf(fopen(txtFileName.distTillDeathX, 'r'), '%f ');
+    dY = fscanf(fopen(txtFileName.distTillDeathY, 'r'), '%f ');
+    lat= fscanf(fopen(txtFileName.lat, 'r'), '%f ');
+    lon= fscanf(fopen(txtFileName.lon, 'r'), '%f ');
     
     %% find index in output geometry
-    b.idxlin = binDownGlobalMap(b.lat,b.lon,binMaps.lat,binMaps.lon,threads);
-    d.idxlin = binDownGlobalMap(d.lat,d.lon,binMaps.lat,binMaps.lon,threads);
+    idxlin = binDownGlobalMap(lat,lon,binMaps.lat,binMaps.lon,threads);
     
     %% sum over parameters for each grid cell
-    b.map = sumMapOverIndexedBins(b.idxlin,Y,X,threads);
-    d.map = sumMapOverIndexedBins(d.idxlin,Y,X,threads);
+    out.tillDeath.x = meanMapOverIndexedBins(dX,idxlin,Y,X,threads);
+    out.tillDeath.y = meanMapOverIndexedBins(dY,idxlin,Y,X,threads);
     
     %% out
-    out.birth = b;
-    out.death = d;
-        
+    
+    
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
     tracks = DD.path.analyzed.files;
     txtdir = [ DD.path.root 'TXT/' ];
     mkdirp(txtdir);
-    FN = {'distTillDeathX','distTillDeathY'};
+    FN = {'distTillDeathX','distTillDeathY','lat','lon'};
     for ii=1:numel(FN); fn = FN{ii};
         txtFileName.(fn) = [ txtdir fn '.txt' ];
     end
@@ -76,8 +75,11 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
             track = getfieldload(tracks(tt).fullname,'dist');
             
             fprintf(fid.distTillDeathX,'%4.1f ',track.x(end));
-            fprintf(fid.distTillDeathY,'%4.1f ',track.y(end));            
-           
+            fprintf(fid.distTillDeathY,'%4.1f ',track.y(end));
+            
+            fprintf(fid.lat,'%3.2f ',track.lat(1) );
+            fprintf(fid.lon,'%3.2f ',track.lon(1) );
+            
         end
         %% close files
         for ii=1:numel(FN); fn = FN{ii};
