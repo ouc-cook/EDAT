@@ -3,10 +3,11 @@
 % 'aviso' - template for AVISO SSH data
 function DD=INPUT
     %DD.template = 'aviso';
-    DD.template = 'pop';
+%     DD.template = 'pop';
+    DD.template = 'pop2avi';
     
     %% threads / debug
-    DD.threads.num = 20;
+    DD.threads.num = 8;
     
     %% overwrite data
     DD.overwrite = false;
