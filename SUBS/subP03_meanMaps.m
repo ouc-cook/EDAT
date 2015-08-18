@@ -82,6 +82,24 @@ function subP03_meanMaps(DD,window,mM)
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     
+         %%
+    figure(5);   
+    pcolor(lo,la,mM.amp);set(gcf,'windowstyle','docked')
+    shading flat
+    caxis([1 2])
+    colorbar
+    colormap(hsv(20))
+    title('scale [km]')
+    hold on
+    plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
+    grid on
+    plot(long,lat,'-black')
+    tit=[DD.path.root 'mapBinScale'];
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    
+    
     
    
     
