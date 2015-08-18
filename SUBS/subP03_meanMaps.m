@@ -100,7 +100,6 @@ function subP03_meanMaps(DD,window,mM)
     
     
     
-    
    
     
     
