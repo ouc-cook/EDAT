@@ -3,10 +3,11 @@
 % 'aviso' - template for AVISO SSH data
 function DD=INPUT
     %DD.template = 'aviso';
-    DD.template = 'pop';
+%     DD.template = 'pop';
+    DD.template = 'pop2avi';
     
     %% threads / debug
-    DD.threads.num = 20;
+    DD.threads.num = 8;
     
     %% overwrite data
     DD.overwrite = false;
@@ -14,8 +15,8 @@ function DD=INPUT
     %% time
     DD.time.from.str  = '19940105'; %first pop/avi
     DD.time.till.str  = '20061226';
-    DD.time.delta_t   = 7; % [days]!
-    threshlife        = 21;
+    DD.time.delta_t   = 2; % [days]!
+    threshlife        = 20;
     
     %% window on globe (0:360° system)
     DD.map.in.west  =  0;

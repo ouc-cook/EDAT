@@ -6,13 +6,21 @@
 function P02_main(DD,window)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
-    writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
+%     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
     meanMap =  initMeanMaps(window);
     %%
-    meanMap = buildMeanMaps(meanMap,txtFileName,DD.threads.num); %#ok<NASGU>
+    [idxlin] = getCrossRefIdx(meanMap,txtFileName,DD.threads.num,DD.path.windowFile);
     %%
+    [meanMap] = buildMeanMaps(meanMap,txtFileName,DD.threads.num,idxlin); %#ok<NASGU>
+    %%
+    try
     save([DD.path.root,'meanMaps.mat'],'-struct','meanMap','-append');
+    catch
+       save([DD.path.root,'meanMaps.mat'],'-struct','meanMap'); 
+    end
+        
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % init output map dim
@@ -30,31 +38,42 @@ function map = initMeanMaps(window) % TODO make better
     [map.lon,map.lat] = meshgrid(xvec,yvec);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads)
+function [idxlin] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
+    
+    if ~isfield(load(windowFile),'idxlin')
+        %% read lat lon vectors
+        lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
+        lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
+        
+        %% find index in output geometry
+        idxlin = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);        
+        save(windowFile,'idxlin','-append');
+    else
+        idxlin = getfield(load(windowFile),'idxlin') ;
+    end    
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads,idxlin)
     %% init
     [Y,X] = size(meanMaps.lat);
-
-    %% read lat lon vectors
-    lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
-    lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
-  
-    %% find index in output geometry
-    idxlin = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
-
+    
     %% read parameters
     u     = fscanf(fopen(txtFileName.u, 'r'),     '%e ');
     v     = fscanf(fopen(txtFileName.v, 'r'),     '%e ');
     scale = fscanf(fopen(txtFileName.scale, 'r'), '%e ');
-
+    amp = fscanf(fopen(txtFileName.amp, 'r'), '%e ');
+    
+    
     %% sum over parameters for each grid cell
-    meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
-    meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
-    meanMaps.scale = meanMapOverIndexedBins(scale,idxlin,Y,X,threads);
+%     meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
+%     meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
+%     meanMaps.scale = meanMapOverIndexedBins(scale,idxlin,Y,X,threads);
+    meanMaps.amp = meanMapOverIndexedBins(amp,idxlin,Y,X,threads);
 
     %% calc angle
-    uv               = meanMaps.u + 1i * meanMaps.v;
-    meanMaps.absUV   = abs(uv) ;
-    meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
+%     uv               = meanMaps.u + 1i * meanMaps.v;
+%     meanMaps.absUV   = abs(uv) ;
+%     meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
 
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
