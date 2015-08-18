@@ -1,6 +1,24 @@
-function subP03_birthDeath(DD,B,D,lo,la)
+function subP03_birthDeath(DD,x,y,B,D,lo,la)
     close all
     [long,lat]=loadcoast360;
+    
+    
+     %%
+    pcolor(lo,la,log(hypot(x,y)));shading flat;
+    set(gcf,'windowstyle','docked')
+    CB = colorbar;
+    colormap(jet(100));
+    yt= get(CB,'ytick');
+    set(CB,'ytick',log(round(exp(yt))));
+    set(CB,'yticklabel',round(exp(yt)));
+    hold on
+    plot(long,lat);
+    title(['distance to location of dissipation [km].'])
+    %%
+    tit=[DD.path.root 'mapBinDistTillDeath'];
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
     
     
     %%
