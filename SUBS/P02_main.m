@@ -6,7 +6,7 @@
 function P02_main(DD,window)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
-%     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
+    writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
     meanMap =  initMeanMaps(window);
     %%
@@ -15,12 +15,12 @@ function P02_main(DD,window)
     [meanMap] = buildMeanMaps(meanMap,txtFileName,DD.threads.num,idxlin); %#ok<NASGU>
     %%
     try
-    save([DD.path.root,'meanMaps.mat'],'-struct','meanMap','-append');
+        save([DD.path.root,'meanMaps.mat'],'-struct','meanMap','-append');
     catch
-       save([DD.path.root,'meanMaps.mat'],'-struct','meanMap');
+        save([DD.path.root,'meanMaps.mat'],'-struct','meanMap');
     end
-
-
+    
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % init output map dim
@@ -41,9 +41,9 @@ end
 function [idxlinDaily] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
     if ~isfield(load(windowFile),'idxlin')
         %% read lat lon vectors
-        lat = fscanf(fopen(txtFileName.lat, 'r'), '%f ');
-        lon = wrapTo360(fscanf(fopen(txtFileName.lon, 'r'), '%f '));
-
+        lat = fscanf(fopen(txtFileName.latD, 'r'), '%f ');
+        lon = wrapTo360(fscanf(fopen(txtFileName.lonD, 'r'), '%f '));
+        
         %% find index in output geometry
         idxlinDaily = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
         save(windowFile,'idxlinDaily','-append');
@@ -55,23 +55,23 @@ end
 function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads,idxlin)
     %% init
     [Y,X] = size(meanMaps.lat);
-
+    
     %% read parameters
     u     = fscanf(fopen(txtFileName.u, 'r'),     '%e ');
     v     = fscanf(fopen(txtFileName.v, 'r'),     '%e ');
     scale = fscanf(fopen(txtFileName.scale, 'r'), '%e ');
-
-
+    
+    
     %% sum over parameters for each grid cell
     meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
     meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
     meanMaps.scale = meanMapOverIndexedBins(scale,idxlin,Y,X,threads);
-
+    
     %% calc angle
-%     uv               = meanMaps.u + 1i * meanMaps.v;
-%     meanMaps.absUV   = abs(uv) ;
-%     meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
-
+    uv               = meanMaps.u + 1i * meanMaps.v;
+    meanMaps.absUV   = abs(uv) ;
+    meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
+    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
@@ -98,8 +98,8 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
         for tt=lims(labindex,1):lims(labindex,2)
             T = disp_progress('show',T,diff(lims(labindex,:))+1,100);
             track = load(tracks(tt).fullname);
-            fprintf(fid.lat,'%3.3f ',track.daily.geo.lat );
-            fprintf(fid.lon,'%3.3f ',track.daily.geo.lon );
+            fprintf(fid.latD,'%3.3f ',track.daily.geo.lat );
+            fprintf(fid.lonD,'%3.3f ',track.daily.geo.lon );
             fprintf(fid.u,  '%1.3e ',track.daily.vel.u);
             fprintf(fid.v,  '%1.3e ',track.daily.vel.v);
             fprintf(fid.scale, '%d ',track.daily.scale);
@@ -109,13 +109,13 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
             fclose(fid.(fn));
         end
     end
-
+    
     %% cat workers' files
-      for ii=1:numel(FN); fn = FN{ii};
-            allFname = strrep(txtFileName.(fn),'.txt','??.txt');
-            outFname = txtFileName.(fn);
-            system(sprintf('cat %s > %s',allFname,outFname));
-            system(sprintf('rm %s',allFname));
-      end
+    for ii=1:numel(FN); fn = FN{ii};
+        allFname = strrep(txtFileName.(fn),'.txt','??.txt');
+        outFname = txtFileName.(fn);
+        system(sprintf('cat %s > %s',allFname,outFname));
+        system(sprintf('rm %s',allFname));
+    end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

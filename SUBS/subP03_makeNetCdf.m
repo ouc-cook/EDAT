@@ -19,9 +19,9 @@ function subP03_makeNetCdf(DD,window,meanMaps)
     nccreate(ncF,'distTillDeath','Dimensions',{'x',X,'y',Y});
      nccreate(ncF,'amplitude','Dimensions',{'x',X,'y',Y});
 
-    ncwrite(ncF,'distTillDeathX',permute(meanMaps.x,[2 1]));
-    ncwrite(ncF,'distTillDeathY',permute(meanMaps.y,[2 1]));
-    ncwrite(ncF,'distTillDeath',permute(hypot(meanMaps.x,meanMaps.y),[2 1]));
+    ncwrite(ncF,'distTillDeathX',permute(meanMaps.tillDeath.x,[2 1]));
+    ncwrite(ncF,'distTillDeathY',permute(meanMaps.tillDeath.y,[2 1]));
+    ncwrite(ncF,'distTillDeath',permute(hypot(meanMaps.tillDeath.x,meanMaps.tillDeath.y),[2 1]));
     ncwrite(ncF,'u',permute(meanMaps.u,[2 1]));
     ncwrite(ncF,'v',permute(meanMaps.v,[2 1]));
     ncwrite(ncF,'long',permute(meanMaps.lon,[2 1]));
