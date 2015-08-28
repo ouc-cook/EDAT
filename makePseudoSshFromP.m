@@ -10,7 +10,7 @@ function makePseudoSshFromP
     
     mkdirp(path.pseudoSsh)
     
-    laloFile = '/scratch/uni/ifmto/u241194/DAILY/EULERIAN/1994-1995/GLB_199402/SSH_GLB_t.t0.1_42l_CORE.19940201.nc'
+    laloFile = '/scratch/uni/ifmto/u241194/DAILY/EULERIAN/1994-1995/GLB_199402/SSH_GLB_t.t0.1_42l_CORE.19940201.nc';
     LAT = ncread(laloFile,keys.lat);
     LON = ncread(laloFile,keys.lon);
     

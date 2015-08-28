@@ -8,16 +8,16 @@ function DD=INPUT
     DD.template = 'depth';
     
     %% threads / debug
-    DD.threads.num = 16;
+    DD.threads.num = 12;
     
     %% overwrite data
     DD.overwrite = false;
     
     %% time
     DD.time.from.str  = '19940201'; %first pop/avi
-    DD.time.till.str  = '19950201';
-    DD.time.delta_t   = 3; % [days]!
-    threshlife        = 30;
+    DD.time.till.str  = '20000101';
+    DD.time.delta_t   = 7; % [days]!
+    threshlife        = 21;
     
     %% window on globe (0:360° system)
     DD.map.in.west  =  0;
