@@ -8,22 +8,22 @@ function DD=INPUT
     DD.template = 'depth';
     
     %% threads / debug
-    DD.threads.num = 16;
+    DD.threads.num = 12;
     
     %% overwrite data
     DD.overwrite = false;
     
     %% time
     DD.time.from.str  = '19940201'; %first pop/avi
-    DD.time.till.str  = '19950201';
+    DD.time.till.str  = '20000101';
     DD.time.delta_t   = 7; % [days]!
-    threshlife        = 35;
+    threshlife        = 21;
     
     %% window on globe (0:360° system)
     DD.map.in.west  =  0;
-    DD.map.in.east  =  40;
-    DD.map.in.south = -50;
-    DD.map.in.north =  -30;
+    DD.map.in.east  =  360;
+    DD.map.in.south = -70;
+    DD.map.in.north =  0;
     
     %% thresholds
     DD.contour.step                = 0.01; % [SI]
