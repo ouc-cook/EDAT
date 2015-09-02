@@ -95,4 +95,4 @@ S04_trackEddies     % track found eddies through time dim
 P01_analyzeTracks
 P02_analyzedTracks2maps
 %% plotting
-% P03_plotting
+P03_plotting
