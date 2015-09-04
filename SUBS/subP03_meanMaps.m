@@ -5,7 +5,13 @@ function subP03_meanMaps(DD,window,mM)
     close all
     [long,lat]=loadcoast360;
     %%
-%     pr=parula(20);
+
+    
+    
+    
+    
+    
+    %     pr=parula(20);
 %     CM = [pr(:,[1 2 3]);flipud(pr)];
     figure(1);
     pcolor(lo,la,mM.v*100);set(gcf,'windowstyle','docked')
@@ -97,7 +103,6 @@ function subP03_meanMaps(DD,window,mM)
     tit=[DD.path.root 'mapBinAmp'];
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
-    
     
     
     

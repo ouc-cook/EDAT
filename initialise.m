@@ -4,7 +4,12 @@
 % Matlab:  7.9
 % Author:  NK
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% dataToCheck - either raw,CUTS,CONTS etc
+% dataToScan - either raw,CUTS,CONTS etc
+% this function is an integral part of the whole EDAT algorithm. 
+% Its output "DD" appears throughout the algorithm. Think of DD as storage
+% place for all meta-info. user-given paramters, directory tree of all
+% files etc.. (see ..dataXXX/DD.mat )
+% It also rescans all data and checks relevant data for eg missing files. 
 function DD = initialise(dataToScan)
     %% basic settings
         preInits;
@@ -16,7 +21,6 @@ function DD = initialise(dataToScan)
     DD.path = catstruct(DD.path,findfiles(DD));
     %% scan data 2 be checked
     if nargin>0
-%     if ~isempty(dataToScan)
         DD = checkData(DD,dataToScan);
     end
     %% load workers

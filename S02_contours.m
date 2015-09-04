@@ -5,5 +5,5 @@ DD    = initialise('cuts');
 files = DD.checks.passed;
 lims  = thread_distro(DD.threads.num,numel(files));
 %% spmd
-S02_main(DD,files,lims)
+S02_main(DD,files,lims);
 

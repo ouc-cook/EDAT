@@ -1,5 +1,5 @@
 %  --- Post-processing step 1 ---
-% 
+%
 %  -(I) load track file
 %  -(II) analyze track
 % 	 -(a) build distance-from-birth-place (x,y)-vectors ([km]) at daily resolution, by interpolating the geo coordinates (smoothingspline).

@@ -4,24 +4,25 @@
 function DD=INPUT
     %DD.template = 'aviso';
     DD.template = 'pop';
+%     DD.template = 'pop2avi';
     
     %% threads / debug
-    DD.threads.num = 20;
+    DD.threads.num = 4;
     
     %% overwrite data
     DD.overwrite = false;
     
     %% time
-    DD.time.from.str  = '19940105'; %first pop/avi
-    DD.time.till.str  = '20061226';
+    DD.time.from.str  = '19990101'; %first pop/avi
+    DD.time.till.str  = '19991001';
     DD.time.delta_t   = 7; % [days]!
-    threshlife        = 21;
+    threshlife        = 35;
     
     %% window on globe (0:360° system)
     DD.map.in.west  =  0;
-    DD.map.in.east  =  360;
-    DD.map.in.south = -80;
-    DD.map.in.north =  80;
+    DD.map.in.east  =  30;
+    DD.map.in.south = -50;
+    DD.map.in.north = -30;
     
     %% thresholds
     DD.contour.step                = 0.01; % [SI]
