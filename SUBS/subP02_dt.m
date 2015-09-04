@@ -3,8 +3,9 @@
 %  -(I) prepare .txt files at "TXT"
 %  -(II) cat all values of all tracks into one .txt per parameter.
 %  -(III) build means of parameters over 1x1degree bins.
-function subP02_amp(DD,window)
-    [FN,tracks,txtFileName] = initTxtFileWrite(DD);
+function subP02_dt(DD,window)
+    keys = {'latO','lonO','ampO','scaleO'};
+    [FN,tracks,txtFileName] = initTxtFileWrite(DD,keys);
     %%
     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
@@ -38,38 +39,37 @@ function map = initMeanMaps(window) % TODO make better
     [map.lon,map.lat] = meshgrid(xvec,yvec);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [idxlinOrig] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
+function [idxlinO] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
     
-    if ~isfield(load(windowFile),'idxlinOrig')
+    if ~isfield(load(windowFile),'idxlinO')
         %% read lat lon vectors
-        lat = fscanf(fopen(txtFileName.latOrig, 'r'), '%f ');
-        lon = wrapTo360(fscanf(fopen(txtFileName.lonOrig, 'r'), '%f '));
+        lat = fscanf(fopen(txtFileName.latO, 'r'), '%f ');
+        lon = wrapTo360(fscanf(fopen(txtFileName.lonO, 'r'), '%f '));
         
         %% find index in output geometry
-        idxlinOrig = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
-        save(windowFile,'idxlinOrig','-append');
+        idxlinO = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
+        save(windowFile,'idxlinO','-append');
     else
-        idxlinOrig = getfield(load(windowFile),'idxlinOrig') ;
+        idxlinO = getfield(load(windowFile),'idxlinO') ;
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads,idxlin)
     %% init
-    [Y,X] = size(meanMaps.lat);
-    
+    [Y,X] = size(meanMaps.lat);    
     %% read parameters
-    amp = fscanf(fopen(txtFileName.ampOrig, 'r'), '%e ');
-    
+    amp   = fscanf(fopen(txtFileName.ampO, 'r'), '%e ');
+    scale = fscanf(fopen(txtFileName.scaleO, 'r'), '%e ');
     %% sum over parameters for each grid cell
-    meanMaps.amp = meanMapOverIndexedBins(amp,idxlin,Y,X,threads);
+    meanMaps.amp   = meanMapOverIndexedBins(amp,  idxlin,Y,X,threads);
+    meanMaps.scale = meanMapOverIndexedBins(scale,idxlin,Y,X,threads);
     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
+function [FN,tracks,txtFileName] = initTxtFileWrite(DD,FN)
     tracks = DD.path.analyzed.files;
     txtdir = [ DD.path.root 'TXT/' ];
-    mkdirp(txtdir);
-    FN = {'latOrig','lonOrig','ampOrig'};
+    mkdirp(txtdir);   
     for ii=1:numel(FN); fn = FN{ii};
         txtFileName.(fn) = [ txtdir fn '.txt' ];
     end
@@ -89,9 +89,10 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
         for tt=lims(labindex,1):lims(labindex,2)
             T = disp_progress('show',T,diff(lims(labindex,:))+1,100);
             track = load(tracks(tt).fullname);
-            fprintf(fid.latOrig,'%3.3f ',track.dist.lat );
-            fprintf(fid.lonOrig,'%3.3f ',track.dist.lon );
-            fprintf(fid.ampOrig,'%3.3f ',track.amp*100);
+            fprintf(fid.latO,'%3.3f ',track.dist.lat );
+            fprintf(fid.lonO,'%3.3f ',track.dist.lon );
+            fprintf(fid.ampO,'%3.3f ',track.amp*100);
+            fprintf(fid.scaleO,'%d ',track.scale);
         end
         %% close files
         for ii=1:numel(FN); fn = FN{ii};

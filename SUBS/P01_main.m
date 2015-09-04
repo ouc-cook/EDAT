@@ -47,7 +47,7 @@ function analy = analyzeTrack(track,trackFile)
     %%
     analy.daily.geo                     = geoStuff(analy);
     %%
-    analy.daily.scale                   = scaleStuff(track,analy);
+    analy.scale                         = scaleStuff(track);
     %%
     analy.birthdeath                    = birthdeathPlaceStuff(track);
     %%
@@ -77,9 +77,9 @@ function	[geo] = geoStuff(analy)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function	[scale] = scaleStuff(track,analy)
+function	[scale] = scaleStuff(track)
     scale = extractdeepfield(track,'radius.mean');
-    scale = spline(analy.time,scale,analy.daily.time');
+    %     scale = spline(analy.time,scale,analy.daily.time');
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[vel,dailyTime] = velocityStuff(dist,time)
