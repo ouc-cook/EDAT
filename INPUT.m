@@ -2,11 +2,11 @@
 % 'pop' - template for POP SSH data
 % 'aviso' - template for AVISO SSH data
 function DD=INPUT
-    %DD.template = 'aviso';
-    DD.template = 'pop';
+    DD.template = 'aviso';
+%     DD.template = 'pop';
     
     %% threads / debug
-    DD.threads.num = 20;
+    DD.threads.num = 12;
     
     %% overwrite data
     DD.overwrite = false;
