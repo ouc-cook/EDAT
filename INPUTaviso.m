@@ -16,4 +16,6 @@ function DD = INPUTaviso
     %% parameters
     DD.parameters.ssh_unitFactor = 1; % eg 100 if SSH data in cm, 1/10 if in deka m etc..
     
+    %% switches
+     DD.switches.isAnomaly = true;
 end

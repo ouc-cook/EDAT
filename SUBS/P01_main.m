@@ -1,5 +1,5 @@
 %  --- Post-processing step 1 ---
-% 
+%
 %  -(I) load track file
 %  -(II) analyze track
 % 	 -(a) build distance-from-birth-place (x,y)-vectors ([km]) at daily resolution, by interpolating the geo coordinates (smoothingspline).
@@ -41,17 +41,17 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function analy = analyzeTrack(track,trackFile)
     %%
-%     [analy.dist,analy.time]             = distanceStuff(track);
-%     %%
-%     [analy.daily.vel,analy.daily.time]  = velocityStuff(analy.dist,analy.time);
-%     %%
-%     analy.daily.geo                     = geoStuff(analy);
-%     %%
-%     analy.daily.scale                   = scaleStuff(track,analy);
-%     %%
-%     analy.birthdeath                    = birthdeathPlaceStuff(track);
-%     %%
-%     analy.origFile                      = trackFile;
+    [analy.dist,analy.time]             = distanceStuff(track);
+    %%
+    [analy.daily.vel,analy.daily.time]  = velocityStuff(analy.dist,analy.time);
+    %%
+    analy.daily.geo                     = geoStuff(analy);
+    %%
+    analy.daily.scale                   = scaleStuff(track,analy);
+    %%
+    analy.birthdeath                    = birthdeathPlaceStuff(track);
+    %%
+    analy.origFile                      = trackFile;
     %%
     analy.amp                           = amplitudeStuff(track);
 end
