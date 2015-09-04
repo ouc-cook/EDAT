@@ -87,7 +87,7 @@ S00b_rossbyStuff
 S00c_buildMeanSsh
 S00d_buildSshAnomaly
 %% main steps
-% S01_calc_fields     % redundant by now
+% % S01_calc_fields     % redundant by now
 S02_contours        % calc all contours of sshAnom
 S03_filterContours  % main bottleneck! filter all contours to test for eddy
 S04_trackEddies     % track found eddies through time dim

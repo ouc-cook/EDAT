@@ -39,7 +39,7 @@ function map = initMeanMaps(window) % TODO make better
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [idxlinDaily] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
-    if ~isfield(load(windowFile),'idxlin')
+    if ~isfield(load(windowFile),'idxlinDaily')
         %% read lat lon vectors
         lat = fscanf(fopen(txtFileName.latD, 'r'), '%f ');
         lon = wrapTo360(fscanf(fopen(txtFileName.lonD, 'r'), '%f '));

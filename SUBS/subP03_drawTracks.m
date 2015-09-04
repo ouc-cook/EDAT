@@ -55,5 +55,5 @@ function subP03_drawTracks(DD,window)
     tit=[DD.path.root 'tracksplotAmp'];
     print(tit,'-r400','-depsc')
     system(sprintf('epstopdf %s.eps',tit));
-    
+     system(sprintf('rm %s.eps',tit));
 end
