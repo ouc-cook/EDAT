@@ -6,20 +6,20 @@ function subP03_drawTracks(DD,window)
     CM = jet(100);
     maxampF = [DD.path.root 'maxamp.mat'];
     %%
-    if ~exist(maxampF,'file')
+%     if ~exist(maxampF,'file')
         maxamp=0;
         for tt=1:numel(trackFiles)
             fprintf('%d%%\n',round(100*tt/numel(trackFiles)))
             track = load(trackFiles(tt).fullname);
-            amp = mean(track.amp);
+            amp = nanmean(track.amp);
             if amp>maxamp
                 maxamp=amp;
             end
         end
         save(maxampF,'maxamp');
-    else
-        load(maxampF);
-    end
+%     else
+%         load(maxampF);
+%     end
     %%
     for tt=1:numel(trackFiles)
         fprintf('%d%%\n',round(100*tt/numel(trackFiles)))

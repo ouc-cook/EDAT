@@ -8,7 +8,7 @@ function subP03_drawTracksAge(DD,window)
     las=@(x) x(end);
     %%
     
-    if ~exist(maxageF,'file')
+%     if ~exist(maxageF,'file')
         maxage=0;
         for tt=1:numel(trackFiles)
             fprintf('%d%%\n',round(100*tt/numel(trackFiles)))
@@ -19,9 +19,9 @@ function subP03_drawTracksAge(DD,window)
             end
         end
         save(maxageF,'maxage');
-    else
-        load(maxageF);
-    end
+%     else
+%         load(maxageF);
+%     end
     %%
     for tt=1:numel(trackFiles)
         fprintf('%d%%\n',round(100*tt/numel(trackFiles)))
