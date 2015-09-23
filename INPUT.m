@@ -3,9 +3,9 @@
 % 'aviso' - template for AVISO SSH data
 function DD=INPUT
     %DD.template = 'aviso';
-%     DD.template = 'pop';
+    DD.template = 'pop';
 %     DD.template = 'pop2avi';
-     DD.template = 'depth';
+%      DD.template = 'depth';
     %% threads / debug
     DD.threads.num = 12;
     
