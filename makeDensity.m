@@ -1,5 +1,5 @@
 function makeDensity
-    thr = 3; % workers
+    thr = 4; % workers
     YY=1996:2000;
     init_threads(thr);
     for yy = YY
