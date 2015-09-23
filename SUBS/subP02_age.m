@@ -3,7 +3,7 @@
 %  -(I) prepare .txt files at "TXT"
 %  -(II) cat all values of all tracks into one .txt per parameter.
 %  -(III) build means of parameters over 1x1degree bins.
-function P02_main(DD,window)
+function subP02_age(DD,window)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
@@ -38,17 +38,18 @@ function map = initMeanMaps(window) % TODO make better
     [map.lon,map.lat] = meshgrid(xvec,yvec);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [idxlinDaily] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
-    if ~isfield(load(windowFile),'idxlinDaily')
+function [idxlinOrig] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
+    
+    if ~isfield(load(windowFile),'idxlinOrig')
         %% read lat lon vectors
-        lat = fscanf(fopen(txtFileName.latD, 'r'), '%f ');
-        lon = wrapTo360(fscanf(fopen(txtFileName.lonD, 'r'), '%f '));
+        lat = fscanf(fopen(txtFileName.latOrig, 'r'), '%f ');
+        lon = wrapTo360(fscanf(fopen(txtFileName.lonOrig, 'r'), '%f '));
         
         %% find index in output geometry
-        idxlinDaily = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
-        save(windowFile,'idxlinDaily','-append');
+        idxlinOrig = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
+        save(windowFile,'idxlinOrig','-append');
     else
-        idxlinDaily = getfield(load(windowFile),'idxlinDaily') ;
+        idxlinOrig = getfield(load(windowFile),'idxlinOrig') ;
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,20 +58,10 @@ function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads,idxlin)
     [Y,X] = size(meanMaps.lat);
     
     %% read parameters
-    u     = fscanf(fopen(txtFileName.u, 'r'),     '%e ');
-    v     = fscanf(fopen(txtFileName.v, 'r'),     '%e ');
-    scale = fscanf(fopen(txtFileName.scale, 'r'), '%e ');
-    
+    age = fscanf(fopen(txtFileName.ageOrig, 'r'), '%e ');
     
     %% sum over parameters for each grid cell
-    meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
-    meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
-    meanMaps.scale = meanMapOverIndexedBins(scale,idxlin,Y,X,threads);
-    
-    %% calc angle
-    uv               = meanMaps.u + 1i * meanMaps.v;
-    meanMaps.absUV   = abs(uv) ;
-    meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
+    meanMaps.age = meanMapOverIndexedBins(age,idxlin,Y,X,threads);
     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -78,12 +69,12 @@ function [FN,tracks,txtFileName] = initTxtFileWrite(DD)
     tracks = DD.path.analyzed.files;
     txtdir = [ DD.path.root 'TXT/' ];
     mkdirp(txtdir);
-    FN = {'latD','lonD','u','v','scale'};
+    FN = {'latOrig','lonOrig','ageOrig'};
     for ii=1:numel(FN); fn = FN{ii};
         txtFileName.(fn) = [ txtdir fn '.txt' ];
     end
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%amp%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function writeToTxtFiles(txtFileName,FN,tracks,threads)
     %% open files
     lims = thread_distro(threads,numel(tracks));
@@ -98,11 +89,9 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
         for tt=lims(labindex,1):lims(labindex,2)
             T = disp_progress('show',T,diff(lims(labindex,:))+1,100);
             track = load(tracks(tt).fullname);
-            fprintf(fid.latD,'%3.3f ',track.daily.geo.lat );
-            fprintf(fid.lonD,'%3.3f ',track.daily.geo.lon );
-            fprintf(fid.u,  '%1.3e ',track.daily.vel.u);
-            fprintf(fid.v,  '%1.3e ',track.daily.vel.v);
-            fprintf(fid.scale, '%d ',track.daily.scale);
+            fprintf(fid.latOrig,'%3.3f ',track.dist.lat );
+            fprintf(fid.lonOrig,'%3.3f ',track.dist.lon );
+            fprintf(fid.ageOrig,'%3.3f ',track.age);
         end
         %% close files
         for ii=1:numel(FN); fn = FN{ii};

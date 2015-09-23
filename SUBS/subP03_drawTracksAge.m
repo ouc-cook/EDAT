@@ -1,43 +1,45 @@
-function subP03_drawTracks(DD,window)
+function subP03_drawTracksAge(DD,window)
     trackFiles = DD.path.analyzed.files;
     figure(1)
     set(gcf,'windowstyle','docked'),clf
     hold on
     CM = jet(100);
-    maxampF = [DD.path.root 'maxamp.mat'];
+    maxageF = [DD.path.root 'maxage.mat'];
+    las=@(x) x(end);
     %%
-%     if ~exist(maxampF,'file')
-        maxamp=0;
+    
+%     if ~exist(maxageF,'file')
+        maxage=0;
         for tt=1:numel(trackFiles)
             fprintf('%d%%\n',round(100*tt/numel(trackFiles)))
             track = load(trackFiles(tt).fullname);
-            amp = nanmean(track.amp);
-            if amp>maxamp
-                maxamp=amp;
+            age = las(track.age);
+            if age>maxage
+                maxage=age;
             end
         end
-        save(maxampF,'maxamp');
+        save(maxageF,'maxage');
 %     else
-%         load(maxampF);
+%         load(maxageF);
 %     end
     %%
     for tt=1:numel(trackFiles)
         fprintf('%d%%\n',round(100*tt/numel(trackFiles)))
         track = load(trackFiles(tt).fullname);
         geo = track.daily.geo;
-        amp = nanmean(track.amp);
-        if isnan(amp),continue,end % TODO
+        age = las(track.age);
+        if isnan(age),continue,end % TODO
         tag = abs(diff(geo.lon([1 1:end])))>180;
         geo.lon(tag) = nan;
         geo.lat(tag) = nan;
-        plot(geo.lon,geo.lat,'color',CM(ceil(amp/maxamp*100),:),'linewidth',.2)
+        plot(geo.lon,geo.lat,'color',CM(ceil(age/maxage*100),:),'linewidth',.2)
     end
     colormap(CM);
     cb=colorbar;
     yt=get(cb,'ytick');
-    ytn=linspace(0,maxamp,numel(yt));
-    set(cb,'yticklabel',round((ytn*100)));
-    title('mean amplitude [cm]');
+    ytn=linspace(0,maxage,numel(yt));
+    set(cb,'yticklabel',(ytn));
+    title('final age [days]');
     
     %%
     load coast
@@ -50,10 +52,11 @@ function subP03_drawTracks(DD,window)
     lat(tag)=nan;
     plot(long,lat,'color','blue');
     axis([xl yl]);
-        
+    
     %%
-    tit=[DD.path.root 'tracksplotAmp'];
+    tit=[DD.path.root 'tracksplotAge'];
     print(tit,'-r400','-depsc')
     system(sprintf('epstopdf %s.eps',tit));
-     system(sprintf('rm %s.eps',tit));
+    system(sprintf('rm %s.eps',tit));
+    
 end

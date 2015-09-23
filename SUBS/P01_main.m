@@ -8,6 +8,7 @@
 % 	 -(d) also interpolate daily scale (hori.) vectors.
 % 	 -(e) extract geo-info for birth and death places.
 % 	 -(f) also interpolate daily amplitude vectors.
+% 	 -(g) age
 %  -(III) save analyzed track to "ANALYZED"
 function P01_main(DD,tracks,lims)
     T = disp_progress('init','altering tracks');
@@ -54,8 +55,16 @@ function analy = analyzeTrack(track,trackFile)
     analy.origFile                      = trackFile;
     %%
     analy.amp                           = amplitudeStuff(track);
+    %%
+    analy.age                           = ageStuff(track);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function age = ageStuff(track)
+    age = extractfield(track,'age');
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function amp = amplitudeStuff(track)
     amp = extractdeepfield(track,'peak.amp.to_ellipse');
 end

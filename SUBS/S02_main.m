@@ -3,7 +3,12 @@ function S02_main(DD,files,lims)
     spmd(DD.threads.num)
         for ff = lims(labindex,1):lims(labindex,2)
             T = disp_progress('init',T,diff(lims(labindex,:))+1);
+            try % TODO
             get_contours(DD,files(ff));
+            catch me
+                disp(me.message)
+               files(ff).filenames 
+            end
         end
     end
 end
