@@ -5,6 +5,8 @@ subP02_daily(DD,window);
 %% original time-step
 subP02_dt(DD,window);
 %%
+subP02_visits;
+%%
 subP02_buildBirthDeathMaps(DD,window);
 %%
 subP02_distTillDeath(DD,window);

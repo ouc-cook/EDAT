@@ -10,7 +10,7 @@ function DD=INPUT
     DD.threads.num = 4;
 
     %% overwrite data
-    DD.overwrite = false;
+    DD.overwrite = true;
 
     %% time
     DD.time.from.str  = '19990101'; %first pop/avi

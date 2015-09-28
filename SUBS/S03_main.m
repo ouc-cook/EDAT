@@ -1,11 +1,11 @@
 function S03_main(DD,rossby,files,lims)
     T = disp_progress('init','filtering contours! takes even much longer!');
-    spmd(DD.threads.num)
-        for ff = lims(labindex,1):lims(labindex,2)
-            T = disp_progress('show',T,diff(lims(labindex,:))+1);
-            spmdBlock(DD,files(ff),rossby)
-        end
+    %     spmd(DD.threads.num)
+    for ff = lims(labindex,1):lims(labindex,2)
+        T = disp_progress('show',T,diff(lims(labindex,:))+1);
+        spmdBlock(DD,files(ff),rossby)
     end
+    %     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function spmdBlock(DD,fileff,rossby)
@@ -146,7 +146,10 @@ function [pass,ee] = run_eddy_checks(pass,ee,rossby,cut,DD,direction)
     if ~pass.CR_AmpPeak, return, end;
     
     %% get profiles
-    [ee.profiles] = eddyProfiles(ee,zoom,DD.parameters.fourierOrder);   
+    [ee.profiles] = eddyProfiles(ee,zoom,DD.parameters.fourierOrder);
+    
+    %% get max geostrophic vels
+    [ee.maxGeosVels] = eddyGeosVels(ee.profiles,coriolis(median(zoom.fields.lat(:))));
     
     %% success! append more stuff
     ee = appendFurtherParameters(ee,zoom,cut,DD,rossby.c);
@@ -286,7 +289,6 @@ function [pass] = CR_ClosedRing(ee)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [mask,trackref] = ProjectedLocations(rossbyU,cut,DD,trackref)
     %% get rossby wave phase speed
@@ -420,17 +422,27 @@ function [outIdx] = avoidLand(ssh,peak)
     outIdx = a:b;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function gV = eddyGeosVels(profs,f)
+    ft=@(x) x(1:2);
+    g = 9.81;
+    gV.v = nan(2,1);
+    gV.u = nan(2,1);
+    %% grab first 2 highest maxima of grad h
+    gV.v = g/f * ft(sort(findpeaks(abs(differentiate(profs.fit.x.sshAnom, profs.dist.x)))));
+    gV.u = g/f * ft(sort(findpeaks(abs(differentiate(profs.fit.y.sshAnom, profs.dist.y)))));
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [F] = eddyProfiles(ee,z,fourierOrder)
     F.fit.type  = sprintf('fourier%d',fourierOrder);
     %% detect meridional and zonal profiles shifted to baselevel of current level
     offset_term = ee.peak.amp.to_contour*ee.sense.num - ee.level;
     %%	zonal cut
-    cutX = - ee.sense.num*(z.fields.sshAnom(ee.peak.z.y,:) + offset_term);
-    [water.x] = avoidLand(cutX,ee.peak.z.x);
+    cutX      = - ee.sense.num*(z.fields.sshAnom(ee.peak.z.y,:) + offset_term);
+    water.x   = avoidLand(cutX,ee.peak.z.x);
     prof.x.sshAnom = (cutX(water.x));
     prof.x.dist = z.fields.km_x(ee.peak.z.y,water.x)*1000 ;
     %% meridional cut
-    cutY = - ee.sense.num * (z.fields.sshAnom(:,ee.peak.z.x) + offset_term);
+    cutY    = - ee.sense.num * (z.fields.sshAnom(:,ee.peak.z.x) + offset_term);
     water.y = avoidLand(cutY,ee.peak.z.y);
     prof.y.sshAnom = (cutY(water.y));
     prof.y.dist = z.fields.km_y(water.y,ee.peak.z.x)*1000 ;

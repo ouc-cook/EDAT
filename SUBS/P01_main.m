@@ -57,9 +57,15 @@ function analy = analyzeTrack(track,trackFile)
     analy.amp                           = amplitudeStuff(track);
     %%
     analy.age                           = ageStuff(track);
+    %%
+    analy.visits                        = visitsStuff(track);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+function visits = visitsStuff(track)
+    visits.lat = unique(round(extractdeepfield(track,'geo.lat')));
+    visits.lon = unique(round(extractdeepfield(track,'geo.lon')));
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function age = ageStuff(track)
     age = extractfield(track,'age');
 end
