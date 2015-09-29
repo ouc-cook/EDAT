@@ -8,8 +8,7 @@ subP02_daily(DD,meanMap);
 subP02_dt(DD,meanMap);
 %% visits
 subP02_visits;
-%% 
+%%
 subP02_buildBirthDeathMaps(DD,meanMap);
 %%
 subP02_distTillDeath(DD,meanMap);
-
