@@ -30,35 +30,42 @@ function subP03_meanMaps(DD,window,mM)
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     %%
     figure(2);    
-    pcolor(lo,la,mM.u*100);set(gcf,'windowstyle','docked')
+%     pcolor(lo,la,mM.u*100);set(gcf,'windowstyle','docked')
+    pcolor(lo,la,mM.meanMap.u*100);set(gcf,'windowstyle','docked')
     shading flat
     caxis([-.2 .2]*100)
     colorbar
-    title('U [cm/s]')
+    title('POP: U [cm/s]')
     hold on
     plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
     grid on  
       plot(long,lat)
        colormap(bluewhitered(100))
     tit=[DD.path.root 'mapBinU'];
+     savefig(gcf,tit)      
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     
+%     
+%     popU=mM.meanMap.u*100;
+%     save('../popU.mat','popU')
     
     %%
     
     figure(3);
-    pcolor(lo,la,mM.scale/1000);set(gcf,'windowstyle','docked')
+%     pcolor(lo,la,mM.scale/1000);set(gcf,'windowstyle','docked')
+    pcolor(lo,la,mM.meanMap.scale/1000);set(gcf,'windowstyle','docked')
     shading flat
     caxis([0 200])
     colorbar
     colormap(hsv(20))
-    title('scale [km]')
+    title('POP: scale [km]')
     hold on
     plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
     grid on
     plot(long,lat,'-black')
     tit=[DD.path.root 'mapBinScale'];
+      savefig(gcf,tit)
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     
