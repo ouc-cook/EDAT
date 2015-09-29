@@ -18,7 +18,7 @@ function subP03_makeNetCdf(DD,window,meanMaps)
     nccreate(ncF,'distTillDeathY','Dimensions',{'x',X,'y',Y});
     nccreate(ncF,'distTillDeath','Dimensions',{'x',X,'y',Y});
     nccreate(ncF,'amplitude','Dimensions',{'x',X,'y',Y});
-    nccreate(ncF,'age','Dimensions',{'x',X,'y',Y});
+%     nccreate(ncF,'age','Dimensions',{'x',X,'y',Y});
     
     
     ncwrite(ncF,'distTillDeathX',permute(meanMaps.tillDeath.x,[2 1]));
@@ -35,7 +35,7 @@ function subP03_makeNetCdf(DD,window,meanMaps)
     ncwrite(ncF,'deaths',permute(meanMaps.death.map,[2 1]));
     ncwrite(ncF,'birthsMinusDeaths',permute(meanMaps.birth.map-meanMaps.death.map,[2 1]));
     ncwrite(ncF,'amplitude',permute(meanMaps.amp,[2 1]));
-    ncwrite(ncF,'age',permute(meanMaps.age,[2 1]));
+%     ncwrite(ncF,'age',permute(meanMaps.age,[2 1]));
     
     system(sprintf('ncview %s',ncF))
 end

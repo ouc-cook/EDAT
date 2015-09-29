@@ -1,5 +1,6 @@
 function S03_main(DD,rossby,files,lims)
-    T = disp_progress('init','filtering contours! takes even much longer!');
+    fprintf('wait...\n')
+    T = disp_progress('init','filtering contours! takes looohong time!');
     spmd(DD.threads.num)
         for ff = lims(labindex,1):lims(labindex,2)
             T = disp_progress('show',T,diff(lims(labindex,:))+1);

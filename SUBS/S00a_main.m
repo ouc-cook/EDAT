@@ -2,7 +2,7 @@
 function S00a_main(DD,window)
     lims = thread_distro(DD.threads.num,DD.checks.passedTotal);
     T = disp_progress('init','preparing raw data');
-    %%
+    %% 
     spmd(DD.threads.num)
         spmdBlock(lims,T,DD,window);
     end

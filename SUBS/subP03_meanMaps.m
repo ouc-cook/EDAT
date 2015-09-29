@@ -6,31 +6,6 @@ function subP03_meanMaps(DD,window,mM)
     [long,lat]=loadcoast360;
  
     
-    
-    
-    
-      figure(111);
-    pcolor(lo,la,mM.age);set(gcf,'windowstyle','docked')
-    shading flat
-    caxis([35 300])
-    colormap(jet(100))
-    colorbar
-    title('V [cm/s]')
-    hold on
-    plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
-    grid on
-    plot(long,lat)
-  
-  
-    
-    
-    
-    
-    
-    
-    
-    
-    
  %%   
     %     pr=parula(20);
 %     CM = [pr(:,[1 2 3]);flipud(pr)];

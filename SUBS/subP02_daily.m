@@ -58,14 +58,11 @@ function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads,idxlin)
     %% read parameters
     u     = fscanf(fopen(txtFileName.uD, 'r'),     '%e ');
     v     = fscanf(fopen(txtFileName.vD, 'r'),     '%e ');
-    
-    
-    
+     
     %% sum over parameters for each grid cell
     meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
     meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
-    
-    
+        
     %% calc angle
     uv               = meanMaps.u + 1i * meanMaps.v;
     meanMaps.absUV   = abs(uv) ;
