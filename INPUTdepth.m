@@ -1,6 +1,6 @@
 function DD=INPUTdepth
-
-%     zz = 22;
+    %% depth level
+%   zz = 22;
     zz = 26;
 
     %% dirs

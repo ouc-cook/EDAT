@@ -3,12 +3,7 @@ function S02_main(DD,files,lims)
     spmd(DD.threads.num)
         for ff = lims(labindex,1):lims(labindex,2)
             T = disp_progress('init',T,diff(lims(labindex,:))+1);
-            try % TODO
             get_contours(DD,files(ff));
-            catch me
-                disp(me.message)
-               files(ff).filenames 
-            end
         end
     end
 end
@@ -23,7 +18,7 @@ function get_contours(DD,file)
     %% init
     [ssh,levels] = init_get_contours(DD.contour.step,file.filenames);
     %% loop over levels
-    CONT.all = contourc(ssh,levels)';
+    CONT.all = contourc(ssh,levels)';        
     %% save data
     save(CONT.filename,'-struct','CONT');
 end
@@ -39,3 +34,4 @@ function [ssh,levels] = init_get_contours(increment,file)
     ceillevel = steplim.max(increment,ssh);
     levels = floorlevel:increment:ceillevel;
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

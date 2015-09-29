@@ -25,7 +25,7 @@ function [idxlinDaily] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
         %% read lat lon vectors
         lat = fscanf(fopen(txtFileName.latD, 'r'), '%f ');
         lon = wrapTo360(fscanf(fopen(txtFileName.lonD, 'r'), '%f '));
-        
+
         %% find index in output geometry
         idxlinDaily = binDownGlobalMap(lat,lon,meanMaps.lat,meanMaps.lon,threads);
         save(windowFile,'idxlinDaily','-append');
@@ -37,20 +37,20 @@ end
 function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads,idxlin)
     %% init
     [Y,X] = size(meanMaps.lat);
-    
+
     %% read parameters
     u     = fscanf(fopen(txtFileName.uD, 'r'),     '%e ');
     v     = fscanf(fopen(txtFileName.vD, 'r'),     '%e ');
-    
+
     %% sum over parameters for each grid cell
     meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
     meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
-        
+
     %% calc angle
     uv               = meanMaps.u + 1i * meanMaps.v;
     meanMaps.absUV   = abs(uv) ;
     meanMaps.angleUV = reshape(wrapTo360(rad2deg(phase(uv(:)))),Y,X);
-    
+
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [FN,tracks,txtFileName] = initTxtFileWrite(DD,FN)
@@ -86,7 +86,7 @@ function writeToTxtFiles(txtFileName,FN,tracks,threads)
             fclose(fid.(fn));
         end
     end
-    
+
     %% cat workers' files
     for ii=1:numel(FN); fn = FN{ii};
         allFname = strrep(txtFileName.(fn),'.txt','??.txt');

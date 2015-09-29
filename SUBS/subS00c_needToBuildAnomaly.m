@@ -1,3 +1,4 @@
+% build time-mean over all SSH of given time span.
 function subS00c_needToBuildAnomaly(DD,window,files)
     prmt = @(x) permute(x,[3,1,2]);
     %% sum all SSH
@@ -20,6 +21,5 @@ function subS00c_needToBuildAnomaly(DD,window,files)
     %% build mean
     sshMean = sshSum./ numel(files); %#ok<NASGU>
     %% save
-    save(DD.path.meanSsh.file,'sshMean');
-    
+    save(DD.path.meanSsh.file,'sshMean');    
 end

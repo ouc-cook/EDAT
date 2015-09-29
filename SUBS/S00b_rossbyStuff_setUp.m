@@ -6,7 +6,7 @@ function [TS]=S00b_rossbyStuff_setUp(DD)
     TS.map = DD.map.in;
     TS.map.keys = TS.keys;
     [TS.window,~] = getWindow(TS.salt{1},TS.map);
-    %% distro X lims to chunks
+    %% distro x-dir limits to chunks
    TS.lims.chunks = limsdata(TS.numChunks, TS.window);
     %% distro chunks to threads
     TS.lims.threads = thread_distro(DD.threads.num,TS.numChunks);
@@ -26,7 +26,7 @@ function lims=limsdata(splits,window)
     lims(find(td)-1,2) = window.fullsize.x; % let the one before finish at end(X)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% somewhat redundant since we only use one temp/salt file each..
+% redundant by now since we only use one temp/salt file each.. TODO
 function TS = getTempSaltFiles(TS)
     %% find the temp and salt files
     tt=0;ss=0;

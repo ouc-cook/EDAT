@@ -94,8 +94,7 @@ function	[geo] = geoStuff(analy)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[scale] = scaleStuff(track)
-    scale = extractdeepfield(track,'radius.mean');
-    %     scale = spline(analy.time,scale,analy.daily.time');
+    scale = extractdeepfield(track,'radius.mean');  
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[vel,dailyTime] = velocityStuff(dist,time)
