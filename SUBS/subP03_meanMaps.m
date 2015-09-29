@@ -34,13 +34,54 @@ function subP03_meanMaps(DD,window,mM)
     shading flat
     caxis([-.2 .2]*100)
     colorbar
-    title('U [cm/s]')
+    title('AVISO: U [cm/s]')
     hold on
     plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
     grid on  
       plot(long,lat)
        colormap(bluewhitered(100))
     tit=[DD.path.root 'mapBinU'];
+    savefig(gcf,tit)
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    popU=getfield(load('../popU.mat'),'popU')
+       
+        
+      figure(222);    
+      clf
+    pcolor(lo(2:end-1,:),la(2:end-1,:),mM.u(2:end-1,:)*100 - popU);
+    set(gcf,'windowstyle','docked')
+    shading flat
+    caxis([-.1 .1]*100)
+    colorbar
+    title('AVISO - POP: U [cm/s]')
+    hold on
+    plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
+    grid on  
+      plot(long,lat)
+       colormap(bluewhitered(100))
+    tit=[DD.path.root 'mapBinUavi-pop'];
+    savefig(gcf,tit)
+    print(tit,'-dpng')
+    system(sprintf('convert %s.png -trim %s.png',tit,tit))
+    
+    %%
+       figure(2222);    
+      clf
+    pcolor(lo(2:end-1,:),la(2:end-1,:),abs(mM.u(2:end-1,:)*100) - abs(popU));
+    set(gcf,'windowstyle','docked')
+    shading flat
+    caxis([-.1 .1]*100)
+    colorbar
+    title('AVISO - POP: abs(U) [cm/s]')
+    hold on
+    plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
+    grid on  
+      plot(long,lat)
+       colormap(bluewhitered(100))
+    tit=[DD.path.root 'mapBinUabsavi-abspop'];
+    savefig(gcf,tit)
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     
@@ -53,12 +94,13 @@ function subP03_meanMaps(DD,window,mM)
     caxis([0 200])
     colorbar
     colormap(hsv(20))
-    title('scale [km]')
+    title('AVISO: scale [km]') % TODO
     hold on
     plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
     grid on
     plot(long,lat,'-black')
     tit=[DD.path.root 'mapBinScale'];
+    savefig(gcf,tit)
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
     
