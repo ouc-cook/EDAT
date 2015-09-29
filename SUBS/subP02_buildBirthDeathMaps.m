@@ -1,9 +1,9 @@
-function subP02_buildBirthDeathMaps(DD,window)
+function subP02_buildBirthDeathMaps(DD,binMap)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
-    binMap =  initBinMaps(window);
+   
     %     %%
     binMap = buildBinMaps(binMap,txtFileName,DD.threads.num); %#ok<NASGU>
     %     %%

@@ -8,10 +8,10 @@ function DD=INPUT
     DD.template = 'depth';
 
     %% threads / debug
-    DD.threads.num = 12;
+    DD.threads.num = 4;
 
     %% overwrite data
-    DD.overwrite = false;
+    DD.overwrite = true;
 
     %% time
     DD.time.from.str  = '19940201'; %first pop/avi
@@ -20,9 +20,9 @@ function DD=INPUT
     threshlife        = 35;
 
     %% window on globe (0:360° system)
-    DD.map.in.west  =  70;
-    DD.map.in.east  =  200;
-    DD.map.in.south = -60;
+    DD.map.in.west  =  0;
+    DD.map.in.east  =  30;
+    DD.map.in.south = -50;
     DD.map.in.north = -30;
 
     %% thresholds
@@ -30,7 +30,6 @@ function DD=INPUT
     DD.thresh.maxRadiusOverRossbyL = 4; %[ ]
     DD.thresh.minRossbyRadius      = 20e3; %[SI]
     DD.thresh.amp                  = DD.contour.step; % [SI]
-%     DD.thresh.amp                  = 0.2; % [SI]
     DD.thresh.shape.iq             = 0.55; % isoperimetric quotient [ ]
     DD.thresh.corners.min          = 10; % min number of data points for the perimeter of an eddy[ ]
     DD.thresh.corners.max          = 500; % dont make too small! [ ]
