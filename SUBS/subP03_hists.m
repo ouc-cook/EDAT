@@ -18,8 +18,8 @@ function subP03_hists(DD)
     catch
         save([DD.path.root 'histStruct.mat'],'histoStuff')
     end
-       
-    
+
+
     %% plotting
     %     save
     %     figure(1)
@@ -30,8 +30,8 @@ function subP03_hists(DD)
     set(gcf,'windowstyle','docked')
     histogram(histoStuff.scale/1000)
     title(sprintf('scale[km]. %d values from %d tracks.',datacount,numel(tracksFs)))
-    
-    
+
+
 end
 
 
@@ -47,4 +47,22 @@ function hS = extractStuff(tracksFs,hS)
         hS.amp(ca:cb)   = extractdeepfield(track,'peak.amp.to_ellipse');
         ca = cb + 1;
     end
+
+    %save([DD.path.root 'histStruct.mat'],'-struct','HH')
+    %HH=load([DD.path.root 'histStruct.mat'])
+    %%% plotting
+%%     save
+%%     figure(1)
+%%       set(gcf,'windowstyle','docked')
+%%     scatter(HH.age,HH.amp,(HH.scale/10000).^2)
+   %%%
+    %figure(2)
+      %set(gcf,'windowstyle','docked')
+      %histogram(HH.scale/1000,10:10:400)
+   %title(sprintf('%d values from %d tracks.',datacount,numel(tracksFs)))
+   %xlabel(['scale [km]'])
+   %%%
+   %tit=[DD.path.root 'histScale'];
+    %print(tit,'-r400','-depsc')
+    %system(sprintf('epstopdf %s.eps',tit));
 end

@@ -111,4 +111,3 @@ plot(long,lat,'-black')
 tit=[DD.path.root 'mapBinAmp'];
 print(tit,'-dpng')
 system(sprintf('convert %s.png -trim %s.png',tit,tit))
-
