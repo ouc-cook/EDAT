@@ -5,7 +5,7 @@
 % 	 -(a) build distance-from-birth-place (x,y)-vectors ([km]) at daily resolution, by interpolating the geo coordinates (smoothingspline).
 % 	 -(b) build velocity-vectors by differentiating the vectors from (b).
 % 	 -(c) also interpolate daily lat/lon vectors.
-% 	 -(d) also interpolate daily scale (hori.) vectors.
+% 	 -(d) also interpolate daily scale (hori.) vectors. TODO
 % 	 -(e) extract geo-info for birth and death places.
 % 	 -(f) also interpolate daily amplitude vectors.
 % 	 -(g) age
@@ -63,8 +63,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function visits = visitsStuff(track)
     lat = round(extractdeepfield(track,'geo.lat'));
-    lon = round(extractdeepfield(track,'geo.lon'));        
-    visits = unique(lat + 1i*lon)';    
+    lon = round(extractdeepfield(track,'geo.lon'));
+    visits = unique(lat + 1i*lon)';
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function age = ageStuff(track)

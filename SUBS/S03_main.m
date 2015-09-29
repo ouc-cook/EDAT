@@ -341,7 +341,7 @@ function [mask,trackref] = ProjectedLocations(rossbyU,cut,DD,trackref)
     maskLogical = sparse(imfill(maskLogical,double([yi.center xi.center]),4));
     %% flag respective overlap too
     if strcmp(DD.map.window.type,'globe')
-        maskLogical =flagOverlap(maskLogical, DD.map.window.dim.x );
+        maskLogical =flagOverlap(maskLogical, DD.map.window );
     end
     %% output
     mask.lin = find(maskLogical);

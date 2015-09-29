@@ -102,8 +102,8 @@ function differentGeoCase(TS,MATfileName,oriWindow)
     lims = TS.window.limits;
     getFlag = @(lims,M) double(M(lims.south:lims.north,lims.west:lims.east));
     %%
-    in.lat = getFlag(lims,ncreadOrNc_varget(TS.salt{1},TS.keys.lat,[1 1],[inf inf]));
-    in.lon = getFlag(lims,ncreadOrNc_varget(TS.salt{1},TS.keys.lon,[1 1],[inf inf]));
+    in.lat = getFlag(lims,ncreadOrNc_varget(TS.salt{1},TS.keys.lat,[0 0],[inf inf]));
+    in.lon = getFlag(lims,ncreadOrNc_varget(TS.salt{1},TS.keys.lon,[0 0],[inf inf]));
     %%
     fieldLoad=@(field)  double(getfield(load(MATfileName,field),field));
     in.data = fieldLoad('data');
