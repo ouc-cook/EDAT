@@ -18,9 +18,7 @@ function subP03_hists(DD)
     catch
         save([DD.path.root 'histStruct.mat'],'histoStuff')
     end
-    
-    
-    
+       
     
     %% plotting
     %     save

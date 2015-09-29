@@ -3,15 +3,13 @@
 %  -(I) prepare .txt files at "TXT"
 %  -(II) cat all values of all tracks into one .txt per parameter.
 %  -(III) build means of parameters over 1x1degree bins.
-function subP02_daily(DD,window)
+function subP02_daily(DD,meanMap)
     keys =  {'latD','lonD','uD','vD'};
     [FN,tracks,txtFileName] = initTxtFileWrite(DD,keys);
     %%
     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
-    meanMap =  initMeanMaps(window);
-    %%
-    [idxlin] = getCrossRefIdx(meanMap,txtFileName,DD.threads.num,DD.path.windowFile);
+   [idxlin] = getCrossRefIdx(meanMap,txtFileName,DD.threads.num,DD.path.windowFile);
     %%
     [meanMap] = buildMeanMaps(meanMap,txtFileName,DD.threads.num,idxlin); %#ok<NASGU>
     %%
@@ -19,22 +17,7 @@ function subP02_daily(DD,window)
         save([DD.path.root,'meanMaps.mat'],'-struct','meanMap','-append');
     catch
         save([DD.path.root,'meanMaps.mat'],'-struct','meanMap');
-    end    
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% init output map dim
-function map = initMeanMaps(window) % TODO make better
-    geo = window.geo;
-    %     bs  = DD.map.out.binSize;
-    %%
-    if round(geo.east - geo.west)==360
-        xvec    = wrapTo360(1:1:360);
-    else
-        xvec    = wrapTo360(round(geo.west):1:round(geo.east));
     end
-    yvec    = round(geo.south):1:round(geo.north);
-    %%
-    [map.lon,map.lat] = meshgrid(xvec,yvec);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [idxlinDaily] = getCrossRefIdx(meanMaps,txtFileName,threads,windowFile)
@@ -59,13 +42,10 @@ function meanMaps = buildMeanMaps(meanMaps,txtFileName,threads,idxlin)
     u     = fscanf(fopen(txtFileName.uD, 'r'),     '%e ');
     v     = fscanf(fopen(txtFileName.vD, 'r'),     '%e ');
     
-    
-    
     %% sum over parameters for each grid cell
     meanMaps.u = meanMapOverIndexedBins(u,idxlin,Y,X,threads);
     meanMaps.v = meanMapOverIndexedBins(v,idxlin,Y,X,threads);
-    
-    
+        
     %% calc angle
     uv               = meanMaps.u + 1i * meanMaps.v;
     meanMaps.absUV   = abs(uv) ;

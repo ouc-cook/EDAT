@@ -1,31 +1,25 @@
-
-
-
+%%
 mM = meanMaps;
 la = mM.lat;
 lo = mM.lon;
 close all
 [long,lat]=loadcoast360;
-%%
-
-
-
 
 %%
-
-
-
 figure(111);
 pcolor(lo,la,mM.age);set(gcf,'windowstyle','docked')
 shading flat
 caxis([35 300])
 colormap(jet(100))
 colorbar
-title('V [cm/s]')
+title('age [days]')
 hold on
 plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
 grid on
 plot(long,lat)
+tit=[DD.path.root 'mapBinAge'];
+print(tit,'-dpng')
+system(sprintf('convert %s.png -trim %s.png',tit,tit))
 
 %%
 %     pr=parula(20);
@@ -42,9 +36,9 @@ grid on
 plot(long,lat)
 colormap(bluewhitered(100))
 tit=[DD.path.root 'mapBinV'];
-%%
 print(tit,'-dpng')
 system(sprintf('convert %s.png -trim %s.png',tit,tit))
+
 %%
 figure(2);
 pcolor(lo,la,mM.u*100);set(gcf,'windowstyle','docked')
@@ -61,9 +55,7 @@ tit=[DD.path.root 'mapBinU'];
 print(tit,'-dpng')
 system(sprintf('convert %s.png -trim %s.png',tit,tit))
 
-
 %%
-
 figure(3);
 pcolor(lo,la,mM.scale/1000);set(gcf,'windowstyle','docked')
 shading flat
@@ -79,13 +71,11 @@ tit=[DD.path.root 'mapBinScale'];
 print(tit,'-dpng')
 system(sprintf('convert %s.png -trim %s.png',tit,tit))
 
-
 %%
-figure(4);
+figure(4);set(gcf,'windowstyle','docked')
 clf
 lim=.2;
 u= mM.u(:);v= mM.v(:);llo=lo(:);lla=la(:);
-
 fl=abs(u)>lim | abs(v)>.05;
 v(fl)=[];
 llo(fl)=[];
@@ -97,11 +87,12 @@ title('quiver [cm/s]')
 hold on
 plot([min(lo(:)) max(lo(:))],[0 0],'color','black','linewidth',0.5,'linestyle','--')
 grid on
-plot(long,lat)
 axis tight
+ax = axis;
+plot(long,lat)
+axis(ax)
 tit=[DD.path.root 'mapBinQuiv'];
 xlabel(sprintf('skipping vectors with u>%d cm/s',lim*100))
-%%
 print(tit,'-dpng')
 system(sprintf('convert %s.png -trim %s.png',tit,tit))
 

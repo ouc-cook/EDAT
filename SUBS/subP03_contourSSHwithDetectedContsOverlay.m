@@ -22,7 +22,7 @@ function labelsAndPrint(dataDir)
     tit = [dataDir 'contoursWithEddies'];
     print(tit,'-dpng')
     system(sprintf('convert %s.png -trim %s.png',tit,tit))
-    system(sprintf('eog %s.png',tit))
+    system(sprintf('eog %s.png &',tit))
 end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function fig = initFigure

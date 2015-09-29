@@ -1,4 +1,4 @@
-function subP03_drawTracksAge(DD,window)
+function subP03_drawTracksAge(DD)
     trackFiles = DD.path.analyzed.files;
     figure(1)
     set(gcf,'windowstyle','docked'),clf

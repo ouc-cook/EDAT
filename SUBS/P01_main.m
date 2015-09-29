@@ -62,8 +62,9 @@ function analy = analyzeTrack(track,trackFile)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function visits = visitsStuff(track)
-    visits.lat = unique(round(extractdeepfield(track,'geo.lat')));
-    visits.lon = unique(round(extractdeepfield(track,'geo.lon')));
+    lat = round(extractdeepfield(track,'geo.lat'));
+    lon = round(extractdeepfield(track,'geo.lon'));        
+    visits = unique(lat + 1i*lon)';    
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function age = ageStuff(track)
