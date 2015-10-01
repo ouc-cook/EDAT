@@ -1,34 +1,17 @@
-function subP02_distTillDeath(DD,window)
+function subP02_distTillDeath(DD,binMap)
     [FN,tracks,txtFileName] = initTxtFileWrite(DD);
     %%
     writeToTxtFiles(txtFileName,FN,tracks,DD.threads.num);
     %%
-    distTill =  initBinMaps(window);
-    %     %%
-    distTill = buildBinMaps(distTill,txtFileName,DD.threads.num); %#ok<NASGU>
-    %     %%
-    save([DD.path.root,'meanMaps.mat'],'-struct','distTill','-append');
+    binMap = buildBinMaps(binMap,txtFileName,DD.threads.num); %#ok<NASGU>
+    %%
+    save([DD.path.root,'meanMaps.mat'],'-struct','binMap','-append');
     
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% init output map dim
-function map = initBinMaps(window) % TODO make better
-    geo = window.geo;
-    %     bs  = DD.map.out.binSize;
-    %%
-    if round(geo.east - geo.west)==360
-        xvec    = wrapTo360(1:1:360);
-    else
-        xvec    = wrapTo360(round(geo.west):1:round(geo.east));
-    end
-    yvec    = round(geo.south):1:round(geo.north);
-    %%
-    [map.lon,map.lat] = meshgrid(xvec,yvec);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [out] = buildBinMaps(binMaps,txtFileName,threads)
+function [inout] = buildBinMaps(inout,txtFileName,threads)
     %% init
-    [Y,X] = size(binMaps.lat);
+    [Y,X] = size(inout.lat);
     
     %% read lat lon vectors
     dX = fscanf(fopen(txtFileName.distTillDeathX, 'r'), '%f ');
@@ -37,11 +20,11 @@ function [out] = buildBinMaps(binMaps,txtFileName,threads)
     lon= fscanf(fopen(txtFileName.lon, 'r'), '%f ');
     
     %% find index in output geometry
-    idxlin = binDownGlobalMap(lat,lon,binMaps.lat,binMaps.lon,threads);
+    idxlin = binDownGlobalMap(lat,lon,inout.lat,inout.lon,threads);
     
     %% sum over parameters for each grid cell
-    out.tillDeath.x = meanMapOverIndexedBins(dX,idxlin,Y,X,threads);
-    out.tillDeath.y = meanMapOverIndexedBins(dY,idxlin,Y,X,threads);
+    inout.tillDeath.x = meanMapOverIndexedBins(dX,idxlin,Y,X,threads);
+    inout.tillDeath.y = meanMapOverIndexedBins(dY,idxlin,Y,X,threads);
     
     %% out
     

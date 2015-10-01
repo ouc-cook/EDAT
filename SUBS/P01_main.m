@@ -1,13 +1,14 @@
 %  --- Post-processing step 1 ---
-% 
+%
 %  -(I) load track file
 %  -(II) analyze track
 % 	 -(a) build distance-from-birth-place (x,y)-vectors ([km]) at daily resolution, by interpolating the geo coordinates (smoothingspline).
 % 	 -(b) build velocity-vectors by differentiating the vectors from (b).
 % 	 -(c) also interpolate daily lat/lon vectors.
-% 	 -(d) also interpolate daily scale (hori.) vectors.
+% 	 -(d) also interpolate daily scale (hori.) vectors. TODO
 % 	 -(e) extract geo-info for birth and death places.
 % 	 -(f) also interpolate daily amplitude vectors.
+% 	 -(g) age
 %  -(III) save analyzed track to "ANALYZED"
 function P01_main(DD,tracks,lims)
     T = disp_progress('init','altering tracks');
@@ -41,21 +42,36 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function analy = analyzeTrack(track,trackFile)
     %%
-%     [analy.dist,analy.time]             = distanceStuff(track);
-%     %%
-%     [analy.daily.vel,analy.daily.time]  = velocityStuff(analy.dist,analy.time);
-%     %%
-%     analy.daily.geo                     = geoStuff(analy);
-%     %%
-%     analy.daily.scale                   = scaleStuff(track,analy);
-%     %%
-%     analy.birthdeath                    = birthdeathPlaceStuff(track);
-%     %%
-%     analy.origFile                      = trackFile;
+    [analy.dist,analy.time]             = distanceStuff(track);
+    %%
+    [analy.daily.vel,analy.daily.time]  = velocityStuff(analy.dist,analy.time);
+    %%
+    analy.daily.geo                     = geoStuff(analy);
+    %%
+    analy.scale                         = scaleStuff(track);
+    %%
+    analy.birthdeath                    = birthdeathPlaceStuff(track);
+    %%
+    analy.origFile                      = trackFile;
     %%
     analy.amp                           = amplitudeStuff(track);
+    %%
+    analy.age                           = ageStuff(track);
+    %%
+    analy.visits                        = visitsStuff(track);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function visits = visitsStuff(track)
+    lat = round(extractdeepfield(track,'geo.lat'));
+    lon = round(extractdeepfield(track,'geo.lon'));
+    visits = unique(lat + 1i*lon)';
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function age = ageStuff(track)
+    age = extractfield(track,'age');
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function amp = amplitudeStuff(track)
     amp = extractdeepfield(track,'peak.amp.to_ellipse');
 end
@@ -77,9 +93,8 @@ function	[geo] = geoStuff(analy)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function	[scale] = scaleStuff(track,analy)
-    scale = extractdeepfield(track,'radius.mean');
-    scale = spline(analy.time,scale,analy.daily.time');
+function	[scale] = scaleStuff(track)
+    scale = extractdeepfield(track,'radius.mean');  
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function	[vel,dailyTime] = velocityStuff(dist,time)

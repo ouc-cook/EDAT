@@ -8,6 +8,7 @@ function S00d_main(files,sshMean)
     end
     parfor_progress(0);
 end
+% subtract mean from each file
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function treatFile(ff,files,sshMean)
     currentFile = files(ff).filenames;

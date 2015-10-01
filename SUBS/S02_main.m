@@ -18,7 +18,7 @@ function get_contours(DD,file)
     %% init
     [ssh,levels] = init_get_contours(DD.contour.step,file.filenames);
     %% loop over levels
-    CONT.all = contourc(ssh,levels)';
+    CONT.all = contourc(ssh,levels)';        
     %% save data
     save(CONT.filename,'-struct','CONT');
 end
@@ -34,3 +34,4 @@ function [ssh,levels] = init_get_contours(increment,file)
     ceillevel = steplim.max(increment,ssh);
     levels = floorlevel:increment:ceillevel;
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

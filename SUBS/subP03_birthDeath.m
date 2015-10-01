@@ -4,13 +4,14 @@ function subP03_birthDeath(DD,x,y,B,D,lo,la)
     
     
      %%
-    pcolor(lo,la,log(hypot(x,y)));shading flat;
+    pcolor(lo,la,log(abs(hypot(x,y))));shading flat;
     set(gcf,'windowstyle','docked')
     CB = colorbar;
     colormap(jet(100));
     yt= get(CB,'ytick');
-    set(CB,'ytick',log(round(exp(yt))));
-    set(CB,'yticklabel',round(exp(yt)));
+   
+       
+    set(CB,'yticklabel',round(10*exp(yt))/10);
     hold on
     plot(long,lat);
     title(['distance to location of dissipation [km].'])

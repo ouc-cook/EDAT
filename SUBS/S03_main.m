@@ -1,11 +1,13 @@
 function S03_main(DD,rossby,files,lims)
-    T = disp_progress('init','filtering contours! takes even much longer!');
+    fprintf('wait...\n')
+    T = disp_progress('init','filtering contours! takes looohong time!');
     spmd(DD.threads.num)
         for ff = lims(labindex,1):lims(labindex,2)
             T = disp_progress('show',T,diff(lims(labindex,:))+1);
             spmdBlock(DD,files(ff),rossby)
         end
     end
+    %     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function spmdBlock(DD,fileff,rossby)
@@ -105,86 +107,89 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [pass,ee] = run_eddy_checks(pass,ee,rossby,cut,DD,direction)
     window = DD.map.window;
-    
+
     %% pre-nan-check
     pass.rim = CR_RimNan(ee.coor.int, window.dim.y, cut.fields.sshAnom);
     if ~pass.rim, return, end;
-    
+
     %% closed ring check
     [pass.CR_ClosedRing] = CR_ClosedRing(ee);
     if ~pass.CR_ClosedRing, return, end;
-    
+
     %% pre filter 'thin 1dimensional' eddies (performance)
     pass.CR_2deddy = CR_2deddy(ee.coor.int);
     if ~pass.CR_2deddy, return, end;
-    
+
     %% get sub map around eddy
     [zoom,pass.winlim] = cutMaskOperation(ee.coor,DD.parameters.zoomIncreaseFac,window,cut.fields);
     if ~pass.winlim, return, end;
-    
+
     %% check for nans within eddy
     [pass.CR_Nan] = CR_Nan(zoom);
     if ~pass.CR_Nan, return, end;
-    
+
     %% check for correct sense
     [pass.CR_sense,ee.sense] = CR_sense(zoom,direction,ee.level);
     if ~pass.CR_sense, return, end;
-    
+
     %% calc contour circumference in [SI]
     [ee.circum.si,ee.fourierCont] = eddyCircumference(zoom);
-    
+
     %% calculate area with respect to contour
     [ee.area,pass.Area] = getArea(ee,DD.thresh.maxRadiusOverRossbyL,DD.thresh.minRossbyRadius,rossby);
     if ~pass.Area, return, end;
-    
+
     %% filter eddies not circle-like enough
     [pass.CR_Shape,ee.iq] = CR_Shape(ee,DD.thresh.shape.iq);
     if ~pass.CR_Shape, return, end;
-    
+
     %% get peak position and amplitude w.r.t contour
     [pass.CR_AmpPeak,ee.peak,zoom.ssh_BasePos] = CR_AmpPeak(ee,zoom,DD.thresh.amp);
     if ~pass.CR_AmpPeak, return, end;
-    
+
     %% get profiles
-    [ee.profiles] = eddyProfiles(ee,zoom,DD.parameters.fourierOrder);   
-    
+    [ee.profiles] = eddyProfiles(ee,zoom,DD.parameters.fourierOrder);
+
+    %% get max geostrophic vels
+    [ee.maxGeosVels] = eddyGeosVels(ee.profiles,coriolis(median(zoom.fields.lat(:))));
+
     %% success! append more stuff
     ee = appendFurtherParameters(ee,zoom,cut,DD,rossby.c);
-    
+
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function  [ee,zoom] = appendFurtherParameters(ee,zoom,cut,DD,rossbyC)
-    
+
     %% get radius according to max UV ie min vort
     [ee.radius] = eddyRadiusFromUV(ee);
-    
+
     %% get ideal ellipse contour
     zoom.mask.ellipse = eddyEllipse(ee);
-    
+
     %% get effective amplitude relative to ellipse;
     ee.peak.amp.to_ellipse = eddyAmp2Ellipse(ee.peak.z,zoom.fields.sshAnom,zoom.mask.ellipse);
-    
+
     %% append mask to ee in cut coor
     [ee.mask] = sparse(eddyPackMask(zoom.mask.filled,zoom.limits,cut.dim));
-    
+
     %% get center of 'volume'
     [ee.CoV] = CenterOfVolume(zoom.ssh_BasePos,zoom.limits,cut.dim.y);
-    
+
     %% get area centroid
     [ee.CoA] = CenterOfVolume(double(logical(zoom.ssh_BasePos)),zoom.limits,cut.dim.y);
-    
+
     %% get trackref
     ee.trackref = getTrackRef(ee,DD.parameters.trackingRef);
-    
+
     %% get coordinates
     ee.geo = geocoor(zoom, ee.trackref);
-    
+
     %% append 'age'
     ee.age = 0;
-    
+
     %% append projected location
     [ee.projLocsMask] = ProjectedLocations(rossbyC,cut,DD,ee.trackref);
-    
+
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [zoom,pass] = cutMaskOperation(coor,enlargeFac,window,cutFields)
@@ -286,7 +291,6 @@ function [pass] = CR_ClosedRing(ee)
     end
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [mask,trackref] = ProjectedLocations(rossbyU,cut,DD,trackref)
     %% get rossby wave phase speed
@@ -339,7 +343,7 @@ function [mask,trackref] = ProjectedLocations(rossbyU,cut,DD,trackref)
     maskLogical = sparse(imfill(maskLogical,double([yi.center xi.center]),4));
     %% flag respective overlap too
     if strcmp(DD.map.window.type,'globe')
-        maskLogical =flagOverlap(maskLogical, DD.map.window.dim.x );
+        maskLogical =flagOverlap(maskLogical, DD.map.window );
     end
     %% output
     mask.lin = find(maskLogical);
@@ -420,17 +424,27 @@ function [outIdx] = avoidLand(ssh,peak)
     outIdx = a:b;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function gV = eddyGeosVels(profs,f)
+    ft=@(x) x(1:2);
+    g = 9.81;
+    gV.v = nan(2,1);
+    gV.u = nan(2,1);
+    %% grab first 2 highest maxima of grad h
+    gV.v = g/f * ft(sort(findpeaks(abs(differentiate(profs.fit.x.sshAnom, profs.dist.x)))));
+    gV.u = g/f * ft(sort(findpeaks(abs(differentiate(profs.fit.y.sshAnom, profs.dist.y)))));
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [F] = eddyProfiles(ee,z,fourierOrder)
     F.fit.type  = sprintf('fourier%d',fourierOrder);
     %% detect meridional and zonal profiles shifted to baselevel of current level
     offset_term = ee.peak.amp.to_contour*ee.sense.num - ee.level;
     %%	zonal cut
-    cutX = - ee.sense.num*(z.fields.sshAnom(ee.peak.z.y,:) + offset_term);
-    [water.x] = avoidLand(cutX,ee.peak.z.x);
+    cutX      = - ee.sense.num*(z.fields.sshAnom(ee.peak.z.y,:) + offset_term);
+    water.x   = avoidLand(cutX,ee.peak.z.x);
     prof.x.sshAnom = (cutX(water.x));
     prof.x.dist = z.fields.km_x(ee.peak.z.y,water.x)*1000 ;
     %% meridional cut
-    cutY = - ee.sense.num * (z.fields.sshAnom(:,ee.peak.z.x) + offset_term);
+    cutY    = - ee.sense.num * (z.fields.sshAnom(:,ee.peak.z.x) + offset_term);
     water.y = avoidLand(cutY,ee.peak.z.y);
     prof.y.sshAnom = (cutY(water.y));
     prof.y.dist = z.fields.km_y(water.y,ee.peak.z.x)*1000 ;
@@ -558,9 +572,9 @@ function mask = eddyCut_mask(zoom)
     %% inside
     querypoints = [queryX,queryY];
     node = struct2array(zoom.coor.exact);
-    
+
     insideLin = queryLin(inpoly(querypoints,node)); % MAIN BOTTLENECK!!!!!
-    
+
     mask.inside = dummymask;
     mask.inside(insideLin) = true;
     %% on rim

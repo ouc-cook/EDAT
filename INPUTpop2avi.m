@@ -12,6 +12,11 @@ function DD=INPUTpop2avi
     
     %% parameters
     DD.parameters.ssh_unitFactor = 100; % eg 100 if SSH data in cm, 1/10 if in deka m etc..
+    
+    
+    
+    %% switches
+    DD.switches.isAnomaly = false;
 end
 
 
