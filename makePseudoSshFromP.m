@@ -45,8 +45,6 @@ function spmdBlock(path,keys,lims,LAT,LON,zz)
     end
 end
 
-
-
 function opDay(subp,dd,keys,path,LAT,LON)
     Pf = subp.pres(dd).fullname;
     %% read

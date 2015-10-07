@@ -1,3 +1,0 @@
-makeDensity
-makePressureAtZ
-makePseudoSshFromP

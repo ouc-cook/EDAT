@@ -1,8 +1,11 @@
 function makePressureAtZ
     g = 9.81;
+    % set vertical level
     zi = 26; % 1875m
-%     zi = 19; % 465m
-%     zi = 22; % 918m
+    %     zi = 19; % 465m
+    %     zi = 22; % 918m
+    
+    %%
     init_threads(12);
     path.dens = '/scratch/uni/ifmto/u300065/PUBLIC/STrhoP9495/DENS/';
     path.pres = '/scratch/uni/ifmto/u300065/PUBLIC/STrhoP9495/PRES/';
@@ -30,7 +33,6 @@ function main(path,yy,g,zi)
             continue
         end
         
-        
         subp.out = [path.pres monDir '/'];
         mkdirp(subp.out);
         
@@ -51,8 +53,6 @@ function main(path,yy,g,zi)
         end
     end
 end
-
-
 
 function opDay(subp,dd,g,zi)
     Df = subp.dens(dd).fullname;
@@ -82,7 +82,6 @@ function opDay(subp,dd,g,zi)
     pres = pres*1e-4; % pascal to db
     
     %% write netCdf
-    
     system(['rm -f ' Fout]);
     nccreate(Fout,'PRES','Dimensions',{'X',X,'Y',Y});
     ncwrite(Fout,'PRES',pres);

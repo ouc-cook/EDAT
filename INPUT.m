@@ -8,7 +8,7 @@ function DD=INPUT
     DD.template = 'depth';
     
     %% threads / debug
-    DD.threads.num = 16;
+    DD.threads.num = 2;
     
     %% overwrite data
     DD.overwrite = false;
