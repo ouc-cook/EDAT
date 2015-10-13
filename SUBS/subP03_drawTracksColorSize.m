@@ -1,4 +1,4 @@
-minAge = 100;
+minAge = 300;
 trackFiles = DD.path.tracks.files;
 figure(1)
 set(gcf,'windowstyle','docked'),clf
