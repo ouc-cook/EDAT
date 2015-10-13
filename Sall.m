@@ -83,14 +83,14 @@
 %% data preparation
 % S00a_prep_raw_data
 % S00b_rossbyStuff
-%% SSH 2 SSH-anomaly
+% %% SSH 2 SSH-anomaly
 % S00c_buildMeanSsh
 % S00d_buildSshAnomaly
-%% main steps
+% %% main steps
 % S01_calc_fields     % probably redundant by now
 % S02_contours        % calc all contours of sshAnom
-% S03_filterContours  % main bottleneck! filter all contours to test for eddy
-% S04_trackEddies     % track found eddies through time dim
+S03_filterContours  % main bottleneck! filter all contours to test for eddy
+S04_trackEddies     % track found eddies through time dim
 %% post process
 P01_analyzeTracks
 P02_analyzedTracks2maps
