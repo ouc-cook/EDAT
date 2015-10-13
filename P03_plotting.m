@@ -8,11 +8,11 @@ subP03_birthDeath(DD,meanMaps.tillDeath.x,meanMaps.tillDeath.y,meanMaps.birth,me
 % %%
 subP03_makeNetCdf(DD,meanMaps);
 % %%
-subP03_drawTracks(DD,window);
+% subP03_drawTracks(DD,window);
 %%
 subP03_hists(DD);
 %%
-subP03_drawTracksAge(DD);
+% subP03_drawTracksAge(DD);
 %%
 subP03_drawTracksColorSize
 %%

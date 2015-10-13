@@ -69,6 +69,10 @@ end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [eddy,ssh] = loadEddiesAndSsh(DD,day2plot)
     eddy = load(DD.path.eddies.files(day2plot).fullname);
-    ssh  = getfield(getfield(load(eddy.filename.cut),'fields'),'sshAnom');
+    try
+        ssh  = getfield(getfield(load(DD.path.cuts.files(day2plot).fullname),'fields'),'sshAnom');
+    catch
+        ssh  = getfield(getfield(load(DD.path.cuts.files(day2plot).fullname),'fields'),'ssh'); % in case cuts are recycled from old version (ssh anomaly used to be called "ssh")
+    end   
 end
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
